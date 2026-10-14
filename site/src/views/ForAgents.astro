@@ -1,0 +1,160 @@
+---
+import Base from '../layouts/Base.astro';
+import Faq from '../components/Faq.astro';
+import { CONFIG } from '../config';
+import { YA2026 } from '../data/ya2026';
+import { YA2027 } from '../data/ya2027';
+import { href } from '../i18n/paths';
+import { rm } from '../lib/format';
+import { partnerPlan } from '../lib/tax/partner';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const path = 'for-agents/';
+const title = zh ? '给保险 / PRS 顾问：你的专属省税计算器' : 'For insurance & PRS advisors: your own tax-saving calculator';
+const description = zh
+  ? '一个带你名字和 WhatsApp 的省税计算器链接：客户自己算出保险和 PRS 能省多少税，再一键 WhatsApp 你。'
+  : 'A tax-saving calculator link with your name and WhatsApp: clients see how much tax their insurance and PRS can save, then message you in one tap.';
+const focus = ['lifeInsurance', 'eduMedInsurance', 'prs'];
+const examples = [5_000, 8_000, 12_000].map((m) => ({ m, p: partnerPlan(YA2026, YA2027, { monthly: m, bonusMonths: 0, paid: {} }, focus) }));
+const demoHref = href(lang, 'p/demo/');
+
+const faqs = zh
+  ? [
+      { q: '我需要懂电脑吗？', a: '不需要。你只要提供名字、职称、WhatsApp 号码（头像可选），我们做好后发一个链接给你，你复制发给客户或放在 Facebook、WhatsApp 状态就行。' },
+      { q: '会帮我推荐产品吗？', a: '不会。计算器只计算税务减免能省多少税，不推荐任何保险或基金产品。产品建议由你按照自己的执照和公司规定提供。' },
+      { q: '客户的资料会被收集吗？', a: '不会。客户输入的数字只保存在他们自己的手机里，我们和你都看不到。只有客户主动按 WhatsApp，你才会收到他们的讯息。' },
+      { q: '税率改了怎么办？', a: '年费包含一整年的税务数据更新。2027 年预算案的改变已经包括在内，国会通过后我们会同步更新。' },
+      { q: '可以改资料吗？', a: '可以。换号码、换职称、换头像，联系我们免费修改。' },
+    ]
+  : [
+      { q: 'Do I need any tech skills?', a: 'No. Send us your name, title and WhatsApp number (photo optional). We send you a link to share with clients or post on Facebook and WhatsApp status.' },
+      { q: 'Does it recommend products?', a: 'No. It only calculates how much tax the reliefs save. Product advice stays with you, under your own licence and company rules.' },
+      { q: 'Is client data collected?', a: 'No. The numbers clients enter stay on their own phone — neither we nor you can see them. You only hear from a client when they tap WhatsApp.' },
+      { q: 'What if tax rules change?', a: 'The yearly fee includes a full year of data updates. Budget 2027 changes are already included and will be finalised once Parliament passes them.' },
+      { q: 'Can I change my details?', a: 'Yes — new number, title or photo, just tell us and we update it free.' },
+    ];
+---
+
+<Base lang={lang} title={title} description={description} path={path} noindex>
+  <section class="bg-gradient-to-b from-teal-50 to-slate-50 border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 pt-10 pb-10">
+      <p class="inline-block text-xs font-semibold text-teal-800 bg-teal-100 rounded-full px-3 py-1">
+        {zh ? '年底是客户最关心扣税的时候' : 'Year-end is when clients care most about tax'}
+      </p>
+      <h1 class="mt-4 text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">{title}</h1>
+      <p class="mt-3 text-slate-600 max-w-2xl">
+        {
+          zh
+            ? '客户最常问：「买这个保险能扣多少税？」发给他们一个链接，让他们输入月薪，自己看到人寿保险、医药保险和 PRS 还能帮他们省多少税——然后一键 WhatsApp 你。'
+            : 'Clients always ask: “How much tax does this policy save me?” Send them one link. They enter their salary, see exactly how much life insurance, medical insurance and PRS can still save them — then WhatsApp you in one tap.'
+        }
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href={demoHref} class="px-5 py-3 rounded-xl bg-teal-700 text-white font-semibold hover:bg-teal-800">
+          {zh ? '看示范页面 →' : 'See the demo →'}
+        </a>
+        {
+          CONFIG.agentOrderUrl && (
+            <a href={CONFIG.agentOrderUrl} target="_blank" rel="noopener" class="px-5 py-3 rounded-xl bg-white border border-slate-300 font-semibold text-slate-900 hover:bg-slate-50">
+              {zh ? `立即开通 · ${CONFIG.agentPrice.zh}` : `Get yours · ${CONFIG.agentPrice.en}`}
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+    <section>
+      <h2 class="text-xl font-bold text-slate-900 mb-4">{zh ? '你会得到' : 'What you get'}</h2>
+      <div class="grid sm:grid-cols-2 gap-4">
+        {
+          (zh
+            ? [
+                ['你的专属链接', '页面上是你的名字、职称和头像，看起来就是你自己的工具。'],
+                ['客户自己算出省多少', '人寿保险 RM3,000、医药/教育保险 RM4,000、PRS RM3,000，按客户的税率算出准确金额。'],
+                ['一键 WhatsApp 你', '讯息会自动带上客户的月薪和可省金额，你一看就知道怎么跟进。'],
+                ['中英双语、手机优先', '客户点开就能用，不用下载、不用注册。'],
+                ['每年数据更新', '已包括 2027 年预算案的个人减免 RM12,000 和新税率。'],
+                ['不收集客户资料', '数字只留在客户手机里，符合个人资料保护的要求。'],
+              ]
+            : [
+                ['Your own link', 'Your name, title and photo on the page — it looks like your own tool.'],
+                ['Clients see their exact saving', 'Life insurance RM3,000, medical/education insurance RM4,000, PRS RM3,000 — worked out at the client’s own tax rate.'],
+                ['One-tap WhatsApp to you', 'The message already includes the client’s salary and saving, so you know how to follow up.'],
+                ['English + Chinese, mobile-first', 'Clients open it and use it — no download, no sign-up.'],
+                ['Yearly data updates', 'Already includes Budget 2027’s RM12,000 relief and new rates.'],
+                ['No client data collected', 'Numbers stay on the client’s phone.'],
+              ]
+          ).map(([h, p]) => (
+            <div class="bg-white rounded-2xl border border-slate-200 p-5">
+              <p class="font-semibold text-slate-900">{h}</p>
+              <p class="text-sm text-slate-600 mt-1">{p}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-bold text-slate-900 mb-2">{zh ? '客户会看到这样的数字' : 'What clients will see'}</h2>
+      <p class="text-sm text-slate-600 mb-4">{zh ? '单身、没有花红、保险和 PRS 今年都还没缴：' : 'Single, no bonus, nothing paid yet this year:'}</p>
+      <div class="table-scroll bg-white rounded-2xl border border-slate-200">
+        <table class="w-full text-sm num">
+          <thead class="bg-slate-50 text-slate-600">
+            <tr>
+              <th class="text-left p-3">{zh ? '月薪' : 'Salary'}</th>
+              <th class="text-right p-3">{zh ? '人寿保险' : 'Life ins.'}</th>
+              <th class="text-right p-3">{zh ? '医药保险' : 'Medical ins.'}</th>
+              <th class="text-right p-3">PRS</th>
+              <th class="text-right p-3">{zh ? '合计可省' : 'Total'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              examples.map(({ m, p }) => (
+                <tr class="border-t border-slate-100">
+                  <td class="p-3">{rm(m)}</td>
+                  {p.rows.map((r) => (
+                    <td class="p-3 text-right">{rm(r.saving)}</td>
+                  ))}
+                  <td class="p-3 text-right font-bold text-teal-700">{rm(p.totalSaving)}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-bold text-slate-900 mb-4">{zh ? '怎么开通' : 'How it works'}</h2>
+      <ol class="space-y-3">
+        {
+          (zh
+            ? ['下单付款', '发给我们：名字、职称、WhatsApp 号码（头像可选）', '24 小时内收到你的专属链接']
+            : ['Order and pay', 'Send us your name, title and WhatsApp number (photo optional)', 'Get your link within 24 hours']
+          ).map((step, i) => (
+            <li class="flex gap-3 items-start bg-white rounded-xl border border-slate-200 p-4">
+              <span class="w-7 h-7 rounded-full bg-teal-700 text-white text-sm font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+              <span class="text-slate-800">{step}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="mt-4 text-lg font-bold text-slate-900">
+        {zh ? '价格：' : 'Price: '}
+        {CONFIG.agentPrice[lang]}
+        <span class="text-sm font-normal text-slate-600">{zh ? '（含一整年数据更新）' : ' (includes a full year of updates)'}</span>
+      </p>
+      {!CONFIG.agentOrderUrl && <p class="mt-2 text-sm text-slate-500">{zh ? '预订即将开放。' : 'Orders open soon.'}</p>}
+    </section>
+
+    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+  </div>
+</Base>

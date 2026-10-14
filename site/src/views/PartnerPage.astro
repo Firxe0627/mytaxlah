@@ -1,0 +1,118 @@
+---
+import '../styles/global.css';
+import PartnerCalc from '../components/islands/PartnerCalc';
+import { CONFIG } from '../config';
+import { metaFor } from '../data/reliefMeta';
+import type { Partner } from '../data/partners';
+import { absolute, asset, href, htmlLang, otherLang } from '../i18n/paths';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+  partner: Partner;
+}
+const { lang, partner } = Astro.props;
+const zh = lang === 'zh';
+const name = partner.name[lang];
+const color = partner.color ?? '#059669';
+const title = zh ? `${name}｜保险与 PRS 省税计算器` : `${name} | Insurance & PRS tax-saving calculator`;
+const description = partner.intro?.[lang] ?? (zh ? '算算保险和 PRS 减免还能帮你省多少税。' : 'See how much tax your insurance and PRS reliefs can still save.');
+const initials = name.replace(/[（(].*$/, '').trim().slice(0, 2);
+const ogImage = absolute(asset(zh ? 'og-zh.png' : 'og-en.png'), Astro.site);
+const focus = partner.focus.map((id) => {
+  const m = metaFor(id);
+  return { id, name: m.name[lang], short: m.short[lang] };
+});
+const path = `p/${partner.slug}/`;
+---
+
+<!doctype html>
+<html lang={htmlLang(lang)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content={color} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={absolute(href(lang, path), Astro.site)} />
+    <meta property="og:image" content={ogImage} />
+  </head>
+  <body class="min-h-screen font-sans antialiased">
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
+      <div class="flex justify-end">
+        <a href={href(otherLang(lang), path)} class="text-sm px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 bg-white">
+          {zh ? 'English' : '中文'}
+        </a>
+      </div>
+
+      <header class="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-4">
+        {
+          partner.photo ? (
+            <img src={asset(partner.photo)} alt={name} width="72" height="72" class="w-18 h-18 rounded-full object-cover" />
+          ) : (
+            <div class="w-[72px] h-[72px] rounded-full flex items-center justify-center text-white text-2xl font-bold shrink-0" style={{ background: color }}>
+              {initials}
+            </div>
+          )
+        }
+        <div>
+          <p class="text-xl font-extrabold text-slate-900">{name}</p>
+          <p class="text-sm text-slate-600">{partner.title[lang]}</p>
+          {partner.company && <p class="text-xs text-slate-500 mt-0.5">{partner.company}</p>}
+        </div>
+      </header>
+
+      {
+        partner.demo && (
+          <p class="text-sm rounded-xl bg-sky-50 border border-sky-200 text-sky-900 p-3">
+            {zh ? '👋 这是给保险 / PRS 顾问看的示范页面。' : '👋 This is a demo page for insurance / PRS advisors.'}{' '}
+            <a href={href(lang, 'for-agents/')} class="underline font-semibold">
+              {zh ? '了解专属版本' : 'Get your own'}
+            </a>
+          </p>
+        )
+      }
+
+      <div>
+        <h1 class="text-2xl font-extrabold text-slate-900 leading-snug">
+          {zh ? '你的保险和 PRS，今年还能帮你省多少税？' : 'How much tax can your insurance and PRS still save you this year?'}
+        </h1>
+        <p class="mt-2 text-slate-600">{description}</p>
+      </div>
+
+      <PartnerCalc
+        client:load
+        lang={lang}
+        slug={partner.slug}
+        partnerName={name}
+        whatsapp={partner.whatsapp}
+        demo={partner.demo}
+        color={color}
+        focus={focus}
+        offerHref={href(lang, 'for-agents/')}
+      />
+
+      <footer class="pt-4 text-xs text-slate-500 space-y-2">
+        <p>
+          {
+            zh
+              ? '计算结果为估算，假设你是马来西亚税务居民，只计个人、EPF、SOCSO 和上面三项减免。实际税额以 LHDN 评估为准。本页不构成税务或投资建议。'
+              : 'Estimates only, assuming a Malaysian tax resident with the individual, EPF, SOCSO and the three reliefs above. LHDN’s assessment is final. Not tax or investment advice.'
+          }
+        </p>
+        <p>
+          {zh ? '计算器由' : 'Calculator by'}{' '}
+          <a href={href(lang)} class="underline">
+            {CONFIG.brand[lang]}
+          </a>{' '}
+          {zh ? '提供 · 你输入的数字只保存在你的手机里。' : '· the numbers you enter stay on your device.'}
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

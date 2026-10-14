@@ -1,0 +1,11 @@
+---
+import View from '../../views/PartnerPage.astro';
+import { PARTNERS } from '../../data/partners';
+
+export function getStaticPaths() {
+  return PARTNERS.map((partner) => ({ params: { slug: partner.slug }, props: { partner } }));
+}
+const { partner } = Astro.props;
+---
+
+<View lang="zh" partner={partner} />

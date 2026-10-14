@@ -7,6 +7,9 @@ export const CONFIG = {
   /** Payhip (or other) checkout link for the paid toolkit. Empty = toolkit CTA hidden. */
   toolkitUrl: 'https://payhip.com/b/4Wxh0',
   toolkitPrice: 'US$4.49 (≈RM19)',
+  /** Agent edition: order link (e.g. a Payhip product) and price label. Empty URL = no order button. */
+  agentOrderUrl: '',
+  agentPrice: { zh: 'RM99 / 年', en: 'RM99 / year' },
   /** Google AdSense publisher id, e.g. "ca-pub-1234567890123456". Empty = no ads. */
   adsenseClient: '',
   /** Cloudflare Web Analytics token. Empty = no analytics. */
