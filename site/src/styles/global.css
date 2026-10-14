@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* Long-form content (guides, relief pages) */
+.prose-lite {
+  line-height: 1.75;
+  color: #1e293b;
+}
+.prose-lite h2 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+  color: #0f172a;
+  line-height: 1.35;
+}
+.prose-lite h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+  color: #0f172a;
+}
+.prose-lite p {
+  margin: 0.75rem 0;
+}
+.prose-lite ul,
+.prose-lite ol {
+  margin: 0.75rem 0;
+  padding-left: 1.25rem;
+}
+.prose-lite ul {
+  list-style: disc;
+}
+.prose-lite ol {
+  list-style: decimal;
+}
+.prose-lite li {
+  margin: 0.35rem 0;
+}
+.prose-lite a {
+  color: #047857;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-lite strong {
+  color: #0f172a;
+}
+.prose-lite table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.925rem;
+  margin: 1rem 0;
+}
+.prose-lite th,
+.prose-lite td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.5rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+.prose-lite th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Number inputs without spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

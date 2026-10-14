@@ -1,0 +1,160 @@
+---
+import '../styles/global.css';
+import { CONFIG } from '../config';
+import { absolute, asset, href, htmlLang, otherLang } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Path relative to the language root, e.g. "budget-2027/". Used for canonical + hreflang. */
+  path: string;
+  /** Set false when the other language has no equivalent page. */
+  hasAlternate?: boolean;
+  jsonLd?: Record<string, unknown>[];
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+}
+
+const { lang, title, description, path, hasAlternate = true, jsonLd = [], ogType = 'website', noindex = false } = Astro.props;
+const brand = CONFIG.brand[lang];
+const fullTitle = title.includes(brand) ? title : `${title} | ${brand}`;
+const canonical = absolute(href(lang, path), Astro.site);
+const altZh = absolute(href('zh', path), Astro.site);
+const altEn = absolute(href('en', path), Astro.site);
+const ogImage = absolute(asset(lang === 'zh' ? 'og-zh.png' : 'og-en.png'), Astro.site);
+const switchHref = href(otherLang(lang), hasAlternate ? path : '');
+const current = Astro.url.pathname;
+
+const nav = [
+  { key: 'nav.budget2027', path: 'budget-2027/' },
+  { key: 'nav.calculator', path: 'tax-calculator/' },
+  { key: 'nav.planner', path: 'year-end-planner/' },
+  { key: 'nav.salary', path: 'salary/' },
+  { key: 'nav.reliefs', path: 'reliefs/' },
+  { key: 'nav.guides', path: 'guides/' },
+] as const;
+
+const isActive = (p: string) => current.startsWith(href(lang, p));
+---
+
+<!doctype html>
+<html lang={htmlLang(lang)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    {
+      hasAlternate && (
+        <>
+          <link rel="alternate" hreflang="zh-MY" href={altZh} />
+          <link rel="alternate" hreflang="en-MY" href={altEn} />
+          <link rel="alternate" hreflang="x-default" href={altEn} />
+        </>
+      )
+    }
+    <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#059669" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={brand} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={lang === 'zh' ? 'zh_MY' : 'en_MY'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="sitemap" href={asset('sitemap.xml')} />
+    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    {
+      CONFIG.adsenseClient && (
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${CONFIG.adsenseClient}`}
+          crossorigin="anonymous"
+        />
+      )
+    }
+  </head>
+  <body class="min-h-screen flex flex-col font-sans antialiased">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <a href={href(lang)} class="flex items-center gap-2 font-bold text-slate-900 shrink-0">
+          <img src={asset('favicon.svg')} alt="" width="28" height="28" />
+          <span>{brand}</span>
+          <span class="hidden sm:inline text-xs font-normal text-slate-500">{lang === 'zh' ? CONFIG.brand.en : CONFIG.brand.zh}</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-1 ml-auto text-sm">
+          {
+            nav.map((n) => (
+              <a
+                href={href(lang, n.path)}
+                class:list={[
+                  'px-2.5 py-1.5 rounded-md hover:bg-slate-100',
+                  isActive(n.path) ? 'text-emerald-700 font-semibold' : 'text-slate-700',
+                ]}
+              >
+                {t(lang, n.key)}
+              </a>
+            ))
+          }
+        </nav>
+        <a
+          href={switchHref}
+          hreflang={otherLang(lang) === 'zh' ? 'zh-MY' : 'en-MY'}
+          class="ml-auto md:ml-2 text-sm px-2.5 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 shrink-0"
+        >
+          {t(lang, 'lang.switch')}
+        </a>
+        <details class="md:hidden relative">
+          <summary class="list-none cursor-pointer p-2 -mr-2 rounded-md hover:bg-slate-100" aria-label="Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 7h16M4 12h16M4 17h16"></path>
+            </svg>
+          </summary>
+          <div class="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-lg p-2 flex flex-col">
+            {
+              nav.map((n) => (
+                <a href={href(lang, n.path)} class="px-3 py-2.5 rounded-md text-slate-800 hover:bg-slate-100">
+                  {t(lang, n.key)}
+                </a>
+              ))
+            }
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-16">
+      <div class="max-w-5xl mx-auto px-4 py-10 text-sm text-slate-600 grid gap-8 md:grid-cols-3">
+        <div class="md:col-span-2 space-y-3">
+          <p class="font-semibold text-slate-900">{brand}</p>
+          <p>{t(lang, 'footer.disclaimer')}</p>
+          <p class="text-xs text-slate-500">{t(lang, 'footer.updated')}: {CONFIG.updated}</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a class="hover:text-emerald-700" href={href(lang, 'reliefs/')}>{t(lang, 'nav.reliefs')}</a>
+          <a class="hover:text-emerald-700" href={href(lang, 'guides/')}>{t(lang, 'nav.guides')}</a>
+          <a class="hover:text-emerald-700" href={href(lang, 'about/')}>{t(lang, 'footer.about')}</a>
+          <a class="hover:text-emerald-700" href={href(lang, 'privacy/')}>{t(lang, 'footer.privacy')}</a>
+        </div>
+      </div>
+    </footer>
+    {
+      CONFIG.cfAnalyticsToken && (
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: CONFIG.cfAnalyticsToken })}
+        />
+      )
+    }
+  </body>
+</html>

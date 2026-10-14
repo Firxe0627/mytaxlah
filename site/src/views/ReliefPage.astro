@@ -1,0 +1,218 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Faq from '../components/Faq.astro';
+import ToolkitCta from '../components/ToolkitCta.astro';
+import { GROUP_NAMES, RELIEF_META } from '../data/reliefMeta';
+import { YA2026 } from '../data/ya2026';
+import { YA2027 } from '../data/ya2027';
+import { CONFIG } from '../config';
+import { absolute, href } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import { rm } from '../lib/format';
+import { articleLd, breadcrumbLd, faqLd } from '../lib/jsonld';
+import { quickTax } from '../lib/tax/compare';
+import { netTaxFromChargeable } from '../lib/tax/compute';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+  slug: string;
+}
+const { lang, slug } = Astro.props;
+const zh = lang === 'zh';
+const path = `reliefs/${slug}/`;
+const metas = RELIEF_META.filter((m) => m.slug === slug);
+const main = metas[0];
+
+const COMBINED: Record<string, { zh: string; en: string }> = {
+  children: { zh: '孩子减免', en: 'Child relief' },
+  disabled: { zh: '残障人士相关减免', en: 'Reliefs for disabled individuals' },
+  'first-home-loan': { zh: '首购屋房贷利息减免', en: 'First home loan interest relief' },
+  socso: { zh: 'SOCSO 与 EIS 减免', en: 'SOCSO & EIS relief' },
+};
+const name = COMBINED[slug]?.[lang] ?? main.name[lang];
+const r26 = new Map(YA2026.reliefs.map((r) => [r.id, r]));
+const r27 = new Map(YA2027.reliefs.map((r) => [r.id, r]));
+const mainRule = r26.get(main.id) ?? r27.get(main.id);
+const limitStr = mainRule ? rm(mainRule.limit) : '';
+
+const title = zh
+  ? `${name} YA2026：${limitStr ? `上限 ${limitStr}，` : ''}能报什么？`
+  : `${name} YA2026: ${limitStr ? `${limitStr} limit — ` : ''}what qualifies?`;
+const description = `${main.short[lang]} ${zh ? '详细条件、要保留的收据、用满能省多少税，以及 2027 年预算案的改变。' : 'Conditions, receipts to keep, how much tax it saves and Budget 2027 changes.'}`;
+
+// Savings table for amount-type reliefs: tax saved by using the full limit, at several salaries.
+const amountRule = metas.map((m) => r26.get(m.id)).find((r) => r && r.kind === 'amount');
+const savingRows = amountRule
+  ? [4_000, 6_000, 8_000, 10_000, 15_000, 20_000].map((monthly) => {
+      const q = quickTax(YA2026, { monthly, bonusMonths: 0, otherReliefs: 0 });
+      const after = netTaxFromChargeable(YA2026, Math.max(0, q.chargeable - amountRule.limit));
+      return { monthly, rate: q.marginalRate, saving: Math.round((q.tax - after.netTax) * 100) / 100 };
+    })
+  : [];
+
+const related = RELIEF_META.filter((m) => m.group === main.group && m.slug !== slug)
+  .filter((m, i, arr) => arr.findIndex((x) => x.slug === m.slug) === i)
+  .slice(0, 6);
+
+const faqs = metas.flatMap((m) => {
+  const a = r26.get(m.id);
+  const b = r27.get(m.id);
+  const items = [];
+  if (a) {
+    items.push({
+      q: zh ? `${m.name.zh}的上限是多少？` : `What is the limit for ${m.name.en.toLowerCase()}?`,
+      a: zh
+        ? `YA2026 上限 ${rm(a.limit)}${a.kind === 'count' ? '（每个孩子）' : ''}。${b ? `YA2027（提议）${rm(b.limit)}。` : ''}`
+        : `YA2026: ${rm(a.limit)}${a.kind === 'count' ? ' per child' : ''}. ${b ? `YA2027 (proposed): ${rm(b.limit)}.` : ''}`,
+    });
+  }
+  items.push({ q: zh ? `${m.name.zh}要保留什么单据？` : `What records do I keep for ${m.name.en.toLowerCase()}?`, a: `${m.docs[lang]} ${zh ? 'LHDN 可以在 7 年内要求查看。' : 'LHDN can ask for them within 7 years.'}` });
+  return items;
+});
+
+const url = absolute(href(lang, path), Astro.site);
+---
+
+<Base
+  lang={lang}
+  title={title}
+  description={description}
+  path={path}
+  ogType="article"
+  jsonLd={[
+    articleLd(title, description, url, lang, CONFIG.updated),
+    faqLd(faqs),
+    breadcrumbLd([
+      { name: t(lang, 'nav.home'), url: absolute(href(lang), Astro.site) },
+      { name: t(lang, 'nav.reliefs'), url: absolute(href(lang, 'reliefs/'), Astro.site) },
+      { name, url },
+    ]),
+  ]}
+>
+  <PageHeader
+    lang={lang}
+    title={title}
+    intro={main.short[lang]}
+    crumbs={[
+      { label: t(lang, 'nav.reliefs'), path: 'reliefs/' },
+      { label: name, path },
+    ]}
+  />
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <article class="prose-lite max-w-3xl">
+      {
+        metas.map((m) => {
+          const a = r26.get(m.id);
+          const b = r27.get(m.id);
+          return (
+            <section>
+              {metas.length > 1 && <h2>{m.name[lang]}</h2>}
+              <div class="not-prose grid grid-cols-2 gap-3 my-4">
+                <div class="rounded-xl bg-emerald-50 p-4">
+                  <p class="text-xs text-emerald-800">YA2026</p>
+                  <p class="text-xl font-extrabold text-emerald-900 num">
+                    {a ? `${rm(a.limit)}${a.kind === 'count' ? (zh ? ' / 人' : ' each') : ''}` : '—'}
+                  </p>
+                </div>
+                <div class="rounded-xl bg-slate-50 p-4">
+                  <p class="text-xs text-slate-600">YA2027 ({t(lang, 'common.proposed')})</p>
+                  <p class="text-xl font-extrabold text-slate-900 num">
+                    {b ? `${rm(b.limit)}${b.kind === 'count' ? (zh ? ' / 人' : ' each') : ''}` : m.id === 'breastfeeding' ? (zh ? '并入医药' : 'merged') : '—'}
+                  </p>
+                </div>
+              </div>
+              <h3>{zh ? '可以报什么？' : 'What qualifies?'}</h3>
+              <ul>{m.covers[lang].map((c) => <li>{c}</li>)}</ul>
+              {a?.parts && (
+                <>
+                  <h3>{zh ? 'YA2026 子项上限' : 'YA2026 sub-limits'}</h3>
+                  <ul>
+                    {a.parts.map((p) => (
+                      <li>
+                        {p.label[lang]}：{p.limit === null ? (zh ? `与总上限 ${rm(a.limit)} 共用` : `shares the ${rm(a.limit)} overall limit`) : rm(p.limit)}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <h3>{zh ? '实用提示' : 'Tips'}</h3>
+              <ul>{m.tips[lang].map((c) => <li>{c}</li>)}</ul>
+              <h3>{zh ? '要保留的单据' : 'Records to keep'}</h3>
+              <p>{m.docs[lang]}</p>
+              {(a?.note || b?.note) && (
+                <>
+                  <h3>{zh ? '今年和明年的改变' : 'What’s changing'}</h3>
+                  <ul>
+                    {a?.note && <li><strong>YA2026：</strong>{a.note[lang]}</li>}
+                    {b?.note && <li><strong>YA2027：</strong>{b.note[lang]}</li>}
+                  </ul>
+                </>
+              )}
+            </section>
+          );
+        })
+      }
+
+      {
+        savingRows.length > 0 && amountRule && (
+          <section>
+            <h2>{zh ? `用满 ${rm(amountRule.limit)} 能省多少税？` : `How much tax does the full ${rm(amountRule.limit)} save?`}</h2>
+            <p>
+              {zh
+                ? '按单身、没有花红、只有基本减免估算。省下的税 ≈ 用掉的额度 × 你的边际税率。'
+                : 'Single, no bonus, basic reliefs only. Tax saved ≈ amount claimed × your marginal rate.'}
+            </p>
+            <div class="table-scroll">
+              <table class="num">
+                <thead>
+                  <tr>
+                    <th>{zh ? '月薪' : 'Monthly salary'}</th>
+                    <th>{t(lang, 'calc.marginalRate')}</th>
+                    <th>{zh ? '可省税' : 'Tax saved'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {savingRows.map((r) => (
+                    <tr>
+                      <td><a href={href(lang, `salary/rm${r.monthly}/`)}>{rm(r.monthly)}</a></td>
+                      <td>{r.rate}%</td>
+                      <td><strong>{rm(r.saving)}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )
+      }
+    </article>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href={href(lang, 'tax-calculator/')} class="px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700">{t(lang, 'common.tryCalculator')}</a>
+      {main.yearEnd && <a href={href(lang, 'year-end-planner/')} class="px-4 py-2.5 rounded-lg border border-slate-300 text-slate-800 hover:bg-slate-50">{t(lang, 'nav.planner')}</a>}
+    </div>
+
+    <ToolkitCta lang={lang} />
+    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+
+    {
+      related.length > 0 && (
+        <section class="mt-10">
+          <h2 class="text-lg font-bold text-slate-900 mb-3">
+            {zh ? `其他${GROUP_NAMES[main.group].zh}减免` : `More ${GROUP_NAMES[main.group].en.toLowerCase()} reliefs`}
+          </h2>
+          <div class="flex flex-wrap gap-2">
+            {related.map((m) => (
+              <a href={href(lang, `reliefs/${m.slug}/`)} class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm hover:border-emerald-600">
+                {COMBINED[m.slug]?.[lang] ?? m.name[lang]}
+              </a>
+            ))}
+            <a href={href(lang, 'reliefs/')} class="px-3 py-1.5 rounded-full text-sm text-emerald-700 underline">{zh ? '全部减免 →' : 'All reliefs →'}</a>
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>

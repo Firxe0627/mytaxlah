@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Faq from '../components/Faq.astro';
+import ToolkitCta from '../components/ToolkitCta.astro';
+import YearEndPlanner from '../components/islands/YearEndPlanner';
+import { RELIEF_META } from '../data/reliefMeta';
+import { CONFIG } from '../config';
+import { absolute, href } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import { appLd, faqLd } from '../lib/jsonld';
+import { metaLite } from '../lib/metaLite';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const path = 'year-end-planner/';
+const title = zh ? '年底省税规划器：12 月 31 日前还能省多少税？' : 'Year-End Tax Planner Malaysia: Save Tax Before 31 December';
+const description = zh
+  ? '输入收入和今年已花的钱，马上看到每一项 YA2026 减免还剩多少额度、用满能省多少税，按省税金额排序。'
+  : 'Enter your income and what you have spent this year to see how much of each YA2026 relief is left and how much tax you save by using it, ranked by saving.';
+const yearEndIds = new Set(RELIEF_META.filter((m) => m.yearEnd).map((m) => m.id));
+
+const faqs = zh
+  ? [
+      { q: '为什么要在 12 月 31 日前完成？', a: '减免是按「付款年份」计算的。2026 年 12 月 31 日前付的钱算 YA2026；1 月 1 日之后付的就要等到 YA2027 才能报。' },
+      { q: '花 RM100 能省多少税？', a: '等于你的边际税率。边际税率 6% 就省 RM6，19% 就省 RM19。所以减免对高收入的人更有用，低收入的人不必为了减免而消费。' },
+      { q: '最划算的年底省税方法是什么？', a: '先用「本来就要花的钱」：手机/电脑/网络费（生活方式）、体检和疫苗（医药）、运动开销。再考虑储蓄型的：PRS（RM3,000）和 SSPN（RM8,000）——钱还是你的，只是存起来。' },
+      { q: '收据要保留多久？', a: '报税时不需要上传收据，但 LHDN 可能在 7 年内要求查看，所以请保留 7 年。买东西时可以要 e-Invoice（提供身份证号码），方便以后报税。' },
+    ]
+  : [
+      { q: 'Why does it have to be done by 31 December?', a: 'Reliefs follow the year you pay. Money paid by 31 December 2026 counts for YA2026; anything paid from 1 January goes into YA2027.' },
+      { q: 'How much tax does RM100 of spending save?', a: 'Your marginal rate: RM6 at 6%, RM19 at 19%. Reliefs matter most to higher earners — lower earners shouldn’t spend just for a relief.' },
+      { q: 'What are the best year-end moves?', a: 'Start with spending you would do anyway: phone, laptop and internet (lifestyle), check-ups and vaccines (medical), sports. Then savings-type reliefs: PRS (RM3,000) and SSPN (RM8,000) — the money stays yours.' },
+      { q: 'How long should I keep receipts?', a: 'You don’t upload receipts when filing, but LHDN can ask for them for 7 years. Ask for an e-Invoice (give your IC number) to make filing easier.' },
+    ];
+const url = absolute(href(lang, path), Astro.site);
+---
+
+<Base lang={lang} title={title} description={description} path={path} jsonLd={[appLd(title, description, url, lang), faqLd(faqs)]}>
+  <PageHeader
+    lang={lang}
+    title={title}
+    intro={zh
+      ? 'YA2026 的减免只算 2026 年 12 月 31 日前付的钱。这个工具会告诉你每一项减免还剩多少额度、用满能省多少税，最省的排在最前面。'
+      : 'YA2026 reliefs only count money paid by 31 December 2026. This tool shows how much of each relief you have left and how much tax filling it would save — biggest savings first.'}
+    crumbs={[{ label: t(lang, 'nav.planner'), path }]}
+  />
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <YearEndPlanner
+      client:load
+      lang={lang}
+      meta={metaLite(lang, (id) => yearEndIds.has(id))}
+      reliefsBase={href(lang, 'reliefs/')}
+      toolkitUrl={CONFIG.toolkitUrl}
+      toolkitPrice={CONFIG.toolkitPrice}
+    />
+    <article class="prose-lite mt-12 max-w-3xl">
+      <h2>{zh ? '年底省税清单' : 'Year-end checklist'}</h2>
+      <p>
+        {zh ? '想看每一招的详细说明？读' : 'Want the details for each move? Read'}
+        <a href={href(lang, 'guides/year-end-tax-tips/')}>{zh ? '《2026 年底省税 12 招》' : '12 ways to cut your tax before 31 December'}</a>{zh ? '。' : '.'}
+      </p>
+    </article>
+    <ToolkitCta lang={lang} />
+    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+  </div>
+</Base>

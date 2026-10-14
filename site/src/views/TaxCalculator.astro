@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Faq from '../components/Faq.astro';
+import ToolkitCta from '../components/ToolkitCta.astro';
+import TaxCalc from '../components/islands/TaxCalc';
+import { YA2026 } from '../data/ya2026';
+import { absolute, href } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import { appLd, faqLd } from '../lib/jsonld';
+import { groupsLite, metaLite } from '../lib/metaLite';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const path = 'tax-calculator/';
+const title = zh ? '马来西亚个人所得税计算器 YA2026（含全部减免）' : 'Malaysia Income Tax Calculator YA2026 (All Reliefs)';
+const description = zh
+  ? '免费计算 YA2026 个人所得税：涵盖全部 LHDN 减免项目、RM400 回扣、天课，并可切换 YA2027（2027 年预算案）对比。算出会退税还是补税。'
+  : 'Free YA2026 personal income tax calculator for Malaysia: every LHDN relief, the RM400 rebate and zakat, with a YA2027 (Budget 2027) toggle. See whether you get a refund.';
+
+const faqs = zh
+  ? [
+      { q: '什么是应课税收入（chargeable income）？', a: '总收入减去所有减免之后的金额。所得税是按应课税收入分级计算的，不是按总收入。' },
+      { q: 'RM400 回扣是什么？', a: '应课税收入不超过 RM35,000 的税务居民，可以直接从税额中扣掉 RM400；如果配偶没有收入，再多 RM400。回扣最多把税额扣到 0，不会退钱。' },
+      { q: '天课（zakat）怎么算？', a: '已缴的天课或开斋节施舍（fitrah）可以全额从税额中扣除，但不能超过应缴税额。' },
+      { q: '为什么我的结果和 PCB 不一样？', a: 'PCB 是雇主每月按估算扣的税，没有算到你自己报的减免（例如生活方式、保险、医药）。报税时把减免报齐，多扣的部分 LHDN 会退给你。' },
+      { q: '我需要交税吗？', a: '有应课税收入的人都应该登记税务档案并报税，每月被扣 PCB 的人一定要报。至于要不要真的交税，要扣除减免后才知道——单身、只有基本减免的话，月薪约 RM3,500 以下通常不用交税。' },
+    ]
+  : [
+      { q: 'What is chargeable income?', a: 'Total income minus all reliefs. Income tax is calculated on chargeable income band by band, not on your gross income.' },
+      { q: 'What is the RM400 rebate?', a: 'Residents with chargeable income of RM35,000 or less get RM400 off their tax, plus another RM400 if their spouse has no income. It can only bring tax down to zero — it is not paid out.' },
+      { q: 'How does zakat work?', a: 'Zakat or fitrah you paid is deducted from your tax in full, up to the amount of tax payable.' },
+      { q: 'Why is my result different from my PCB?', a: 'PCB is an estimate your employer deducts monthly; it ignores reliefs you claim yourself (lifestyle, insurance, medical…). Claim them when you file and LHDN refunds what was over-deducted.' },
+      { q: 'Do I need to pay tax?', a: 'Anyone with taxable income should register a tax file and file a return — and you must if PCB is deducted from your salary. Whether you actually pay depends on reliefs: a single person with only the basic reliefs usually pays nothing below about RM3,500 a month.' },
+    ];
+const url = absolute(href(lang, path), Astro.site);
+---
+
+<Base lang={lang} title={title} description={description} path={path} jsonLd={[appLd(title, description, url, lang), faqLd(faqs)]}>
+  <PageHeader
+    lang={lang}
+    title={title}
+    intro={zh
+      ? '输入月薪和你今年的开销，计算器会自动套用每一项减免的上限，算出应课税收入、应缴税额，以及会退税还是补税。所有数据只在你的浏览器里计算，不会上传。'
+      : 'Enter your salary and this year’s spending. Every relief limit is applied automatically to give your chargeable income, tax payable and whether you get a refund. Everything is calculated in your browser — nothing is uploaded.'}
+    crumbs={[{ label: t(lang, 'nav.calculator'), path }]}
+  />
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <TaxCalc client:load lang={lang} meta={metaLite(lang)} groups={groupsLite(lang)} reliefsBase={href(lang, 'reliefs/')} />
+
+    <article class="prose-lite mt-12 max-w-3xl">
+      <h2>{zh ? 'YA2026 所得税税率表' : 'YA2026 income tax rates'}</h2>
+      <div class="table-scroll">
+        <table class="num">
+          <thead>
+            <tr>
+              <th>{zh ? '应课税收入 (RM)' : 'Chargeable income (RM)'}</th>
+              <th>{zh ? '税率' : 'Rate'}</th>
+              <th>{zh ? '该级最高税额 (RM)' : 'Tax on band (RM)'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              YA2026.brackets.map((b) => (
+                <tr>
+                  <td>
+                    {b.from.toLocaleString('en-MY')} – {b.to === null ? (zh ? '以上' : 'above') : b.to.toLocaleString('en-MY')}
+                  </td>
+                  <td>{b.rate}%</td>
+                  <td>{b.to === null ? '—' : (((b.to - b.from) * b.rate) / 100).toLocaleString('en-MY')}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <h2>{zh ? '怎么计算？' : 'How it’s calculated'}</h2>
+      <ol>
+        <li>{zh ? '总收入 = 月薪 × (12 + 花红月数) + 其他收入。' : 'Total income = monthly salary × (12 + bonus months) + other income.'}</li>
+        <li>{zh ? '减免总额 = 个人减免 + 你填入的各项减免（每一项按上限截取）。' : 'Total reliefs = individual relief + each relief you enter, capped at its limit.'}</li>
+        <li>{zh ? '应课税收入 = 总收入 − 减免总额。' : 'Chargeable income = total income − total reliefs.'}</li>
+        <li>{zh ? '按上表分级计算税额，再扣除 RM400 回扣（如适用）和天课。' : 'Apply the bands above, then subtract the RM400 rebate (if eligible) and zakat.'}</li>
+      </ol>
+      <p>
+        {zh ? '想知道每一项减免能报什么？看' : 'Not sure what each relief covers? See the'}
+        <a href={href(lang, 'reliefs/')}>{zh ? 'YA2026 减免完整清单' : 'full YA2026 relief list'}</a>{zh ? '。' : '.'}
+      </p>
+    </article>
+    <ToolkitCta lang={lang} />
+    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+  </div>
+</Base>

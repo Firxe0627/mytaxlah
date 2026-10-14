@@ -1,0 +1,11 @@
+---
+import View from '../../views/ReliefPage.astro';
+import { RELIEF_SLUGS } from '../../data/reliefMeta';
+
+export function getStaticPaths() {
+  return RELIEF_SLUGS.map((slug) => ({ params: { slug } }));
+}
+const { slug } = Astro.params;
+---
+
+<View lang="zh" slug={slug!} />

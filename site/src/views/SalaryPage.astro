@@ -1,0 +1,204 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Faq from '../components/Faq.astro';
+import ToolkitCta from '../components/ToolkitCta.astro';
+import { YA2026 } from '../data/ya2026';
+import { YA2027 } from '../data/ya2027';
+import { SALARY_STEPS } from '../data/salaries';
+import { absolute, href } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import { pct, rm } from '../lib/format';
+import { breadcrumbLd, faqLd } from '../lib/jsonld';
+import { annualTaxForSalary, salaryBreakdown } from '../lib/tax/salary';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+  monthly: number;
+}
+const { lang, monthly } = Astro.props;
+const zh = lang === 'zh';
+const path = `salary/rm${monthly}/`;
+const m = rm(monthly);
+
+const b = salaryBreakdown(YA2026, monthly);
+const b27 = salaryBreakdown(YA2027, monthly);
+const y26 = annualTaxForSalary(YA2026, monthly);
+const y27 = annualTaxForSalary(YA2027, monthly);
+const y26b = annualTaxForSalary(YA2026, monthly, 2);
+const saving = Math.round((y26.tax - y27.tax) * 100) / 100;
+const lifestyleSaving = Math.round(2_500 * y26.marginalRate) / 100;
+const prsSaving = Math.round(3_000 * y26.marginalRate) / 100;
+
+const title = zh
+  ? `月薪 ${m} 到手多少？要交多少税？（2026 马来西亚）`
+  : `${m} Salary in Malaysia: Take-Home Pay & Income Tax (2026)`;
+const description = zh
+  ? `月薪 ${m} 扣除 EPF、SOCSO、EIS 和 PCB 后，每月到手约 ${rm(b.net)}；YA2026 全年所得税约 ${rm(y26.tax)}，2027 年预算案后约 ${rm(y27.tax)}。`
+  : `On ${m} a month you take home about ${rm(b.net)} after EPF, SOCSO, EIS and PCB. YA2026 income tax is about ${rm(y26.tax)} a year, falling to ${rm(y27.tax)} after Budget 2027.`;
+
+const idx = SALARY_STEPS.indexOf(monthly);
+const neighbours = SALARY_STEPS.slice(Math.max(0, idx - 3), idx + 4).filter((s) => s !== monthly);
+
+const faqs = zh
+  ? [
+      { q: `月薪 ${m} 每月到手多少？`, a: `约 ${rm(b.net, true)}。扣除 EPF ${rm(b.epf)}、SOCSO ${rm(b.socso, true)}、EIS ${rm(b.eis, true)}，以及 PCB 约 ${rm(b.pcb, true)}（单身、无其他减免）。` },
+      { q: `月薪 ${m} 要交税吗？`, a: y26.tax > 0 ? `要。只计基本减免（个人、EPF、SOCSO）的话，YA2026 全年税额约 ${rm(y26.tax, true)}，边际税率 ${y26.marginalRate}%。报齐其他减免可以再少交。` : `只计基本减免的话，扣除 RM400 回扣后 YA2026 不用交税。不过仍然建议登记税务档案并报税。` },
+      { q: '2027 年预算案后能省多少？', a: saving > 0 ? `个人减免提高到 RM12,000 后，YA2027 税额约 ${rm(y27.tax, true)}，每年省约 ${rm(saving)}。` : '你的税额不受影响。' },
+      { q: '有 2 个月花红的话呢？', a: `年收入 ${rm(y26b.income)}，YA2026 税额约 ${rm(y26b.tax, true)}。花红月份的 PCB 会扣得比较多。` },
+      { q: '雇主要付多少？', a: `雇主每月另外缴 EPF ${rm(b.employerEpf)}、SOCSO ${rm(b.employerSocso, true)}、EIS ${rm(b.employerEis, true)}，总成本约 ${rm(b.employerCost, true)}。` },
+    ]
+  : [
+      { q: `What is the take-home pay on ${m} a month?`, a: `About ${rm(b.net, true)}, after EPF ${rm(b.epf)}, SOCSO ${rm(b.socso, true)}, EIS ${rm(b.eis, true)} and PCB of about ${rm(b.pcb, true)} (single, no other reliefs).` },
+      { q: `Do I pay income tax on ${m} a month?`, a: y26.tax > 0 ? `Yes. With only the basic reliefs (individual, EPF, SOCSO), YA2026 tax is about ${rm(y26.tax, true)} a year at a ${y26.marginalRate}% marginal rate. Claiming other reliefs lowers it.` : `With only the basic reliefs and the RM400 rebate, YA2026 tax is zero. You should still register and file a return.` },
+      { q: 'How much does Budget 2027 save?', a: saving > 0 ? `With the individual relief raised to RM12,000, YA2027 tax is about ${rm(y27.tax, true)} — a saving of about ${rm(saving)} a year.` : 'Your tax doesn’t change.' },
+      { q: 'What if I get a 2-month bonus?', a: `Annual income becomes ${rm(y26b.income)} and YA2026 tax about ${rm(y26b.tax, true)}. PCB is higher in the bonus month.` },
+      { q: 'What does it cost the employer?', a: `The employer also pays EPF ${rm(b.employerEpf)}, SOCSO ${rm(b.employerSocso, true)} and EIS ${rm(b.employerEis, true)} — about ${rm(b.employerCost, true)} in total.` },
+    ];
+
+const url = absolute(href(lang, path), Astro.site);
+const crumbs = [
+  { label: t(lang, 'nav.salary'), path: 'salary/' },
+  { label: m, path },
+];
+---
+
+<Base
+  lang={lang}
+  title={title}
+  description={description}
+  path={path}
+  jsonLd={[
+    faqLd(faqs),
+    breadcrumbLd([
+      { name: t(lang, 'nav.home'), url: absolute(href(lang), Astro.site) },
+      { name: t(lang, 'nav.salary'), url: absolute(href(lang, 'salary/'), Astro.site) },
+      { name: m, url },
+    ]),
+  ]}
+>
+  <PageHeader lang={lang} title={title} crumbs={crumbs}>
+    <div class="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="rounded-xl bg-emerald-50 p-4">
+        <p class="text-xs text-emerald-800">{t(lang, 'calc.netPay')}</p>
+        <p class="text-2xl font-extrabold text-emerald-900 num">{rm(b.net)}</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-600">PCB {t(lang, 'common.perMonth')}</p>
+        <p class="text-2xl font-extrabold text-slate-900 num">{rm(b.pcb)}</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-600">{zh ? 'YA2026 年税' : 'YA2026 tax / yr'}</p>
+        <p class="text-2xl font-extrabold text-slate-900 num">{rm(y26.tax)}</p>
+      </div>
+      <div class="rounded-xl bg-amber-50 p-4">
+        <p class="text-xs text-amber-800">{zh ? '2027 预算案省' : 'Budget 2027 saves'}</p>
+        <p class="text-2xl font-extrabold text-amber-900 num">{rm(saving)}</p>
+      </div>
+    </div>
+  </PageHeader>
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <article class="prose-lite max-w-3xl">
+      <h2>{zh ? `月薪 ${m} 每月扣除明细` : `Monthly deductions on ${m}`}</h2>
+      <div class="table-scroll">
+        <table class="num">
+          <tbody>
+            <tr><td>{zh ? '月薪（税前）' : 'Gross salary'}</td><td>{rm(b.gross, true)}</td></tr>
+            <tr><td>{t(lang, 'calc.epf')} 11%</td><td>− {rm(b.epf, true)}</td></tr>
+            <tr><td>SOCSO</td><td>− {rm(b.socso, true)}</td></tr>
+            <tr><td>EIS</td><td>− {rm(b.eis, true)}</td></tr>
+            <tr><td>{t(lang, 'calc.pcb')}</td><td>− {rm(b.pcb, true)}</td></tr>
+            <tr><th>{t(lang, 'calc.netPay')}</th><th>{rm(b.net, true)}</th></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-slate-500">
+        {zh ? '按 60 岁以下马来西亚公民、单身、EPF 11% 估算。已婚（配偶无收入）或有孩子的话 PCB 会更少。' : 'Malaysian citizen under 60, single, EPF at 11%. PCB is lower if you are married to a non-earning spouse or have children.'}
+      </p>
+
+      <h2>{zh ? '全年所得税（YA2026 vs YA2027）' : 'Annual income tax (YA2026 vs YA2027)'}</h2>
+      <div class="table-scroll">
+        <table class="num">
+          <thead>
+            <tr><th></th><th>YA2026</th><th>YA2027 ({t(lang, 'common.proposed')})</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{zh ? '年收入' : 'Annual income'}</td><td>{rm(y26.income)}</td><td>{rm(y27.income)}</td></tr>
+            <tr><td>{zh ? '基本减免（个人 + EPF + SOCSO）' : 'Basic reliefs (individual + EPF + SOCSO)'}</td><td>− {rm(y26.relief)}</td><td>− {rm(y27.relief)}</td></tr>
+            <tr><td>{t(lang, 'calc.chargeable')}</td><td>{rm(y26.chargeable)}</td><td>{rm(y27.chargeable)}</td></tr>
+            <tr><td>{t(lang, 'calc.marginalRate')}</td><td>{y26.marginalRate}%</td><td>{y27.marginalRate}%</td></tr>
+            <tr><th>{t(lang, 'calc.netTax')}</th><th>{rm(y26.tax, true)}</th><th>{rm(y27.tax, true)}</th></tr>
+            <tr><td>{t(lang, 'calc.effectiveRate')}</td><td>{pct(y26.income ? y26.tax / y26.income : 0)}</td><td>{pct(y27.income ? y27.tax / y27.income : 0)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      {
+        b27.pcb < b.pcb && (
+          <p>
+            {zh
+              ? `如果 2027 年预算案通过，PCB 预计每月从 ${rm(b.pcb, true)} 降到 ${rm(b27.pcb, true)}，每月多拿 ${rm(b.pcb - b27.pcb, true)}。`
+              : `If Budget 2027 passes, PCB should fall from ${rm(b.pcb, true)} to ${rm(b27.pcb, true)} a month — ${rm(b.pcb - b27.pcb, true)} more in your pocket.`}
+          </p>
+        )
+      }
+
+      <h2>{zh ? `月薪 ${m} 怎么少交税？` : `How to pay less tax on ${m}`}</h2>
+      {
+        y26.tax > 0 ? (
+          <ul>
+            <li>
+              {zh ? '把' : 'Use the'} <a href={href(lang, 'reliefs/lifestyle/')}>{zh ? '生活方式减免' : 'lifestyle relief'}</a>
+              {zh ? `用满（手机、电脑、网络费、书）：RM2,500 可省约 ${rm(lifestyleSaving)}。` : ` in full (phone, laptop, internet, books): RM2,500 saves about ${rm(lifestyleSaving)}.`}
+            </li>
+            <li>
+              {zh ? '年底前投入' : 'Put'} <a href={href(lang, 'reliefs/prs/')}>PRS</a>
+              {zh ? ` RM3,000：可省约 ${rm(prsSaving)}，钱还是你的退休金。` : ` RM3,000 before year-end: saves about ${rm(prsSaving)} and the money stays in your retirement pot.`}
+            </li>
+            <li>
+              {zh ? '体检、疫苗、洗牙都算' : 'Check-ups, vaccines and dental all count under the'} <a href={href(lang, 'reliefs/medical/')}>{zh ? '医药减免' : 'medical relief'}</a>
+              {zh ? '（各 RM1,000 子项）。' : ' (RM1,000 sub-limit each).'}
+            </li>
+            <li>
+              {zh ? '用' : 'Run the'} <a href={href(lang, 'year-end-planner/')}>{zh ? '年底省税规划器' : 'year-end planner'}</a>
+              {zh ? '一次算出所有还没用的额度。' : ' to find every unused relief at once.'}
+            </li>
+          </ul>
+        ) : (
+          <p>
+            {zh
+              ? '以基本减免计算你不用交税，所以不需要为了减免额外花钱。如果你有花红或其他收入，用完整计算器再算一次。'
+              : 'With the basic reliefs you pay no tax, so there’s no need to spend for reliefs. If you have a bonus or other income, check with the full calculator.'}
+          </p>
+        )
+      }
+    </article>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href={href(lang, 'tax-calculator/')} class="px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
+        {zh ? '输入我的减免，算准确税额' : 'Calculate with my own reliefs'}
+      </a>
+      <a href={href(lang, 'budget-2027/')} class="px-4 py-2.5 rounded-lg border border-slate-300 text-slate-800 hover:bg-slate-50">
+        {zh ? '2027 预算案计算器' : 'Budget 2027 calculator'}
+      </a>
+    </div>
+
+    <ToolkitCta lang={lang} />
+    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+
+    <section class="mt-10">
+      <h2 class="text-lg font-bold text-slate-900 mb-3">{zh ? '其他月薪' : 'Other salaries'}</h2>
+      <div class="flex flex-wrap gap-2">
+        {
+          neighbours.map((s) => (
+            <a href={href(lang, `salary/rm${s}/`)} class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm hover:border-emerald-600 num">
+              {rm(s)}
+            </a>
+          ))
+        }
+        <a href={href(lang, 'salary/')} class="px-3 py-1.5 rounded-full text-sm text-emerald-700 underline">{zh ? '全部 →' : 'All →'}</a>
+      </div>
+    </section>
+  </div>
+</Base>

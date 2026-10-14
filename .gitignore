@@ -1,0 +1,11 @@
+# Paid product files and marketing drafts stay private
+product/
+marketing/
+.claude/
+node_modules/
+dist/
+.DS_Store
+Thumbs.db
+
+# Private notes for the owner
+操作指南.md

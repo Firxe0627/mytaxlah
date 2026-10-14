@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { href } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const path = 'guides/';
+const title = zh ? '马来西亚个人所得税指南' : 'Malaysian Income Tax Guides';
+const description = zh
+  ? '2027 年预算案解读、YA2026 减免清单、年底省税方法、e-Filing 报税教程。'
+  : 'Budget 2027 explained, the YA2026 relief list, year-end tax moves and how to e-File.';
+const guides = [
+  { path: 'budget-2027/', title: zh ? '2027 年预算案：个税改了什么、你能省多少' : 'Budget 2027: what changed and how much you save' },
+  { path: 'guides/year-end-tax-tips/', title: zh ? '2026 年底省税 12 招' : '12 ways to cut your tax before 31 December' },
+  { path: 'reliefs/', title: zh ? 'YA2026 个人所得税减免完整清单' : 'The complete YA2026 tax relief list' },
+  { path: 'guides/e-filing/', title: zh ? 'e-Filing 报税教程（YA2026）' : 'How to e-File your income tax (YA2026)' },
+  { path: 'salary/', title: zh ? '各档月薪到手与税额一览' : 'Take-home pay and tax for every salary' },
+];
+---
+
+<Base lang={lang} title={title} description={description} path={path}>
+  <PageHeader lang={lang} title={title} intro={description} crumbs={[{ label: t(lang, 'nav.guides'), path }]} />
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <ul class="space-y-3">
+      {
+        guides.map((g) => (
+          <li>
+            <a href={href(lang, g.path)} class="block bg-white rounded-xl border border-slate-200 p-4 font-medium text-slate-900 hover:border-emerald-600">
+              {g.title} →
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>

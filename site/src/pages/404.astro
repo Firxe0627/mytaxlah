@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../i18n/paths';
+---
+
+<Base lang="zh" title="找不到页面 / Page not found" description="找不到页面" path="404/" hasAlternate={false} noindex>
+  <div class="max-w-3xl mx-auto px-4 py-20 text-center">
+    <p class="text-6xl font-extrabold text-emerald-600">404</p>
+    <h1 class="mt-4 text-2xl font-bold text-slate-900">找不到这个页面 · Page not found</h1>
+    <div class="mt-8 flex justify-center gap-3">
+      <a href={href('zh')} class="px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold">回首页</a>
+      <a href={href('en')} class="px-4 py-2.5 rounded-lg border border-slate-300">English home</a>
+    </div>
+  </div>
+</Base>

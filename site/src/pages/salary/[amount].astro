@@ -1,0 +1,11 @@
+---
+import View from '../../views/SalaryPage.astro';
+import { SALARY_STEPS } from '../../data/salaries';
+
+export function getStaticPaths() {
+  return SALARY_STEPS.map((m) => ({ params: { amount: `rm${m}` }, props: { monthly: m } }));
+}
+const { monthly } = Astro.props;
+---
+
+<View lang="zh" monthly={monthly} />

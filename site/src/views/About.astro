@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { CONFIG } from '../config';
+import { YA2026 } from '../data/ya2026';
+import { YA2027 } from '../data/ya2027';
+import type { Lang } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const path = 'about/';
+const brand = CONFIG.brand[lang];
+const title = zh ? `关于${brand}` : `About ${brand}`;
+const description = zh ? `${brand}是免费的马来西亚个人所得税计算工具，中英双语。` : `${brand} is a free bilingual Malaysian income tax toolkit.`;
+const sources = [...YA2027.sources, ...YA2026.sources].filter((s, i, a) => a.findIndex((x) => x.url === s.url) === i);
+---
+
+<Base lang={lang} title={title} description={description} path={path}>
+  <PageHeader lang={lang} title={title} />
+  <div class="max-w-3xl mx-auto px-4 py-8 prose-lite">
+    <p>
+      {
+        zh
+          ? `${brand}（${CONFIG.brand.en}）提供免费的马来西亚个人所得税计算器和中英文指南，帮助打工族看懂自己的税、用好每一项减免。`
+          : `${brand} (${CONFIG.brand.zh}) offers free Malaysian income tax calculators and bilingual guides to help employees understand their tax and use every relief they are entitled to.`
+      }
+    </p>
+    <h2>{zh ? '数据从哪里来？' : 'Where does the data come from?'}</h2>
+    <p>{zh ? '税率和减免依据以下官方文件整理，并用自动化测试核对计算结果：' : 'Rates and reliefs are taken from the official documents below, and the calculations are checked with automated tests:'}</p>
+    <ul>
+      {
+        sources.map((s) => (
+          <li>
+            <a href={s.url} rel="noopener" target="_blank">
+              {s.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <h2>{zh ? '免责声明' : 'Disclaimer'}</h2>
+    <p>
+      {
+        zh
+          ? '本站内容仅供参考，不构成税务、财务或法律建议。计算结果是根据公开资料的估算，实际税额以 LHDN 的评估为准。YA2027 的数字是 2027 年预算案的提议，须待国会通过。如有复杂情况，请咨询持牌税务师。'
+          : 'Content on this site is for information only and is not tax, financial or legal advice. Results are estimates based on public information; your actual tax is as assessed by LHDN. YA2027 figures are Budget 2027 proposals pending Parliament. For complex situations, consult a licensed tax agent.'
+      }
+    </p>
+    <h2>{zh ? '我们怎么维持运营？' : 'How is this site funded?'}</h2>
+    <p>
+      {
+        zh
+          ? '工具永久免费。网站可能显示广告，也提供付费的报税工具包；这些收入用来维持网站和更新数据，不会影响计算结果。'
+          : 'The tools are free. The site may show ads and offers a paid filing toolkit; that income keeps the site running and the data current, and never affects the results.'
+      }
+    </p>
+    {
+      CONFIG.contactEmail && (
+        <>
+          <h2>{zh ? '联系我们' : 'Contact'}</h2>
+          <p>
+            {zh ? '发现错误或有建议？请写信到 ' : 'Spotted an error or have a suggestion? Email '}
+            <a href={`mailto:${CONFIG.contactEmail}`}>{CONFIG.contactEmail}</a>
+          </p>
+        </>
+      )
+    }
+  </div>
+</Base>

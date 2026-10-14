@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import ToolkitCta from '../components/ToolkitCta.astro';
+import { GROUP_NAMES, RELIEF_META, type ReliefGroup } from '../data/reliefMeta';
+import { YA2026 } from '../data/ya2026';
+import { YA2027 } from '../data/ya2027';
+import { absolute, href } from '../i18n/paths';
+import { t } from '../i18n/ui';
+import { rm } from '../lib/format';
+import { articleLd } from '../lib/jsonld';
+import { CONFIG } from '../config';
+import type { Lang, ReliefRule } from '../lib/tax/types';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const path = 'reliefs/';
+const title = zh ? 'YA2026 个人所得税减免完整清单（2027 年报税用）' : 'Malaysia Personal Tax Relief YA2026: The Complete List';
+const description = zh
+  ? 'YA2026 全部个人所得税减免项目和上限：生活方式 RM2,500、医药 RM10,000、PRS RM3,000、SSPN RM8,000 等，并对比 2027 年预算案的改变。'
+  : 'Every YA2026 personal tax relief and its limit — lifestyle RM2,500, medical RM10,000, PRS RM3,000, SSPN RM8,000 and more — compared with Budget 2027 changes.';
+
+const r26 = new Map(YA2026.reliefs.map((r) => [r.id, r]));
+const r27 = new Map(YA2027.reliefs.map((r) => [r.id, r]));
+const limitText = (r: ReliefRule | undefined) => {
+  if (!r) return '—';
+  return `${rm(r.limit)}${r.kind === 'count' ? (zh ? ' / 人' : ' each') : ''}`;
+};
+const yaLimit27 = (id: string) => {
+  if (id === 'breastfeeding') return zh ? '并入医药' : 'merged into medical';
+  const r = r27.get(id);
+  const changed = r && r26.get(id) && r.limit !== r26.get(id)!.limit;
+  return r ? `${limitText(r)}${changed ? ' ↑' : ''}` : '—';
+};
+const groups = Object.keys(GROUP_NAMES) as ReliefGroup[];
+const url = absolute(href(lang, path), Astro.site);
+---
+
+<Base lang={lang} title={title} description={description} path={path} ogType="article" jsonLd={[articleLd(title, description, url, lang, CONFIG.updated)]}>
+  <PageHeader
+    lang={lang}
+    title={title}
+    intro={zh
+      ? 'YA2026 指 2026 年 1 月 1 日至 12 月 31 日的收入，在 2027 年 3–5 月通过 MyTax 报税。下表列出每一项减免的上限，点进去看详细条件、要留什么收据，以及用满能省多少税。'
+      : 'YA2026 covers income from 1 January to 31 December 2026, filed on MyTax in March–May 2027. Each relief and its limit is below — click through for conditions, receipts to keep and how much tax it saves.'}
+    crumbs={[{ label: t(lang, 'nav.reliefs'), path }]}
+  />
+  <div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
+    {
+      groups.map((g) => {
+        const items = RELIEF_META.filter((m) => m.group === g && (r26.has(m.id) || r27.has(m.id)));
+        if (!items.length) return null;
+        return (
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 mb-3">{GROUP_NAMES[g][lang]}</h2>
+            <div class="table-scroll bg-white rounded-2xl border border-slate-200">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th class="text-left p-3">{zh ? '减免项目' : 'Relief'}</th>
+                    <th class="text-right p-3 whitespace-nowrap">YA2026</th>
+                    <th class="text-right p-3 whitespace-nowrap">YA2027*</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((m) => (
+                    <tr class="border-t border-slate-100 align-top">
+                      <td class="p-3">
+                        <a href={href(lang, `reliefs/${m.slug}/`)} class="font-medium text-emerald-700 underline">
+                          {m.name[lang]}
+                        </a>
+                        <p class="text-slate-600 mt-0.5">{m.short[lang]}</p>
+                      </td>
+                      <td class="p-3 text-right num whitespace-nowrap">{limitText(r26.get(m.id))}</td>
+                      <td class="p-3 text-right num whitespace-nowrap">{yaLimit27(m.id)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        );
+      })
+    }
+    <p class="text-xs text-slate-500">
+      {zh ? '* YA2027 为 2027 年预算案提议，须待《财政法案》通过。来源：财政部 2026 与 2027 年预算案税务措施。' : '* YA2027 figures are Budget 2027 proposals pending the Finance Bill. Sources: MOF Budget 2026 and 2027 tax measures.'}
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href={href(lang, 'tax-calculator/')} class="px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700">{t(lang, 'common.tryCalculator')}</a>
+      <a href={href(lang, 'year-end-planner/')} class="px-4 py-2.5 rounded-lg border border-slate-300 text-slate-800 hover:bg-slate-50">{t(lang, 'nav.planner')}</a>
+    </div>
+    <ToolkitCta lang={lang} />
+  </div>
+</Base>

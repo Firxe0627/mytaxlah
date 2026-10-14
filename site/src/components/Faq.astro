@@ -1,0 +1,21 @@
+---
+interface Props {
+  title: string;
+  items: { q: string; a: string }[];
+}
+const { title, items } = Astro.props;
+---
+
+<section class="mt-12">
+  <h2 class="text-xl font-bold text-slate-900 mb-4">{title}</h2>
+  <div class="space-y-3">
+    {
+      items.map((f) => (
+        <details class="bg-white rounded-xl border border-slate-200 p-4">
+          <summary class="cursor-pointer font-medium text-slate-900">{f.q}</summary>
+          <p class="mt-2 text-slate-700 leading-relaxed">{f.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>
