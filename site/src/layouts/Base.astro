@@ -58,6 +58,8 @@ const isActive = (p: string) => current.startsWith(href(lang, p));
       )
     }
     <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    {CONFIG.googleSiteVerification && <meta name="google-site-verification" content={CONFIG.googleSiteVerification} />}
+    {CONFIG.bingSiteVerification && <meta name="msvalidate.01" content={CONFIG.bingSiteVerification} />}
     <meta name="theme-color" content="#059669" />
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={brand} />

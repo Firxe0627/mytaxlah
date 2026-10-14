@@ -11,6 +11,10 @@ export const CONFIG = {
   adsenseClient: '',
   /** Cloudflare Web Analytics token. Empty = no analytics. */
   cfAnalyticsToken: '',
+  /** Google Search Console HTML-tag verification code (the content="..." value). */
+  googleSiteVerification: '',
+  /** Bing Webmaster Tools verification code (msvalidate.01). */
+  bingSiteVerification: '',
   /** Public contact address shown on the About page. Empty = hidden. */
   contactEmail: '',
   /** Shown as "last updated" on calculators and guides. */

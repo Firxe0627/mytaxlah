@@ -65,16 +65,6 @@ export const RELIEF_META: ReliefMeta[] = [
     docs: { zh: 'JKM 发出的 OKU 卡或证明。', en: 'OKU card or JKM certification.' },
   },
   {
-    id: 'disabledSpouse',
-    group: 'family',
-    slug: 'disabled',
-    name: { zh: '残障配偶额外减免', en: 'Disabled spouse' },
-    short: { zh: '配偶是 OKU，在配偶减免之外再加 RM6,000。', en: 'Extra RM6,000 on top of spouse relief if your spouse is OKU.' },
-    covers: { zh: ['配偶持有 JKM 的 OKU 证明。'], en: ['Spouse certified as disabled by JKM.'] },
-    tips: { zh: ['需要同时符合配偶减免的条件。'], en: ['You must also qualify for the spouse relief.'] },
-    docs: { zh: '配偶的 OKU 证明、结婚证书。', en: 'Spouse’s OKU card, marriage certificate.' },
-  },
-  {
     id: 'disabledEquipment',
     group: 'health',
     slug: 'disabled',
@@ -103,6 +93,16 @@ export const RELIEF_META: ReliefMeta[] = [
       en: ['With a non-earning spouse and chargeable income of RM35,000 or less, you also get a second RM400 rebate.', 'If your spouse earns a little, compare separate vs joint assessment.'],
     },
     docs: { zh: '结婚证书；赡养费需要协议或法庭判令和付款记录。', en: 'Marriage certificate; for alimony, the agreement or court order and payment proof.' },
+  },
+  {
+    id: 'disabledSpouse',
+    group: 'family',
+    slug: 'disabled',
+    name: { zh: '残障配偶额外减免', en: 'Disabled spouse' },
+    short: { zh: '配偶是 OKU，在配偶减免之外再加 RM6,000。', en: 'Extra RM6,000 on top of spouse relief if your spouse is OKU.' },
+    covers: { zh: ['配偶持有 JKM 的 OKU 证明。'], en: ['Spouse certified as disabled by JKM.'] },
+    tips: { zh: ['需要同时符合配偶减免的条件。'], en: ['You must also qualify for the spouse relief.'] },
+    docs: { zh: '配偶的 OKU 证明、结婚证书。', en: 'Spouse’s OKU card, marriage certificate.' },
   },
   {
     id: 'childUnder18',
