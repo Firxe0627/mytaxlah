@@ -15,7 +15,7 @@ export const CONFIG = {
   /** Cloudflare Web Analytics token. Empty = no analytics. */
   cfAnalyticsToken: '',
   /** Google Search Console HTML-tag verification code (the content="..." value). */
-  googleSiteVerification: '',
+  googleSiteVerification: 'AOIT4eKCirqkuVktHWA73sFXlKStmZIEMEi_16Jvl8o',
   /** Bing Webmaster Tools verification code (msvalidate.01). */
   bingSiteVerification: '',
   /** Public contact address shown on the About page. Empty = hidden. */
