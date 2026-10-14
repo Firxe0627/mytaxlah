@@ -6,6 +6,7 @@ import ToolkitCta from '../components/ToolkitCta.astro';
 import { CONFIG } from '../config';
 import { YA2026 } from '../data/ya2026';
 import { absolute, href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { t } from '../i18n/ui';
 import { rm } from '../lib/format';
 import { articleLd, faqLd } from '../lib/jsonld';
@@ -17,12 +18,18 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = 'guides/year-end-tax-tips/';
-const title = zh ? '2026 年底省税 12 招：12 月 31 日前做完，YA2026 少交税' : '12 Ways to Cut Your Malaysian Income Tax Before 31 December 2026';
-const description = zh
-  ? '年底前把 YA2026 减免用好：生活方式、医药、运动、PRS、SSPN、保险、旅游门票……每一招的上限、能省多少、要留什么收据。'
-  : 'Use your YA2026 reliefs before year-end: lifestyle, medical, sports, PRS, SSPN, insurance, tourism and more — limits, savings and receipts for each.';
+const title = L(
+  '2026 年底省税 12 招：12 月 31 日前做完，YA2026 少交税',
+  '12 Ways to Cut Your Malaysian Income Tax Before 31 December 2026',
+  '12 Cara Jimat Cukai Pendapatan Sebelum 31 Disember 2026',
+);
+const description = L(
+  '年底前把 YA2026 减免用好：生活方式、医药、运动、PRS、SSPN、保险、旅游门票……每一招的上限、能省多少、要留什么收据。',
+  'Use your YA2026 reliefs before year-end: lifestyle, medical, sports, PRS, SSPN, insurance, tourism and more — limits, savings and receipts for each.',
+  'Gunakan pelepasan YA2026 sebelum hujung tahun: gaya hidup, perubatan, sukan, PRS, SSPN, insurans, pelancongan dan lain-lain — had, penjimatan dan resit untuk setiap satu.',
+);
 
 // Worked example: RM8,000 a month, 1-month bonus.
 const ex = quickTax(YA2026, { monthly: 8_000, bonusMonths: 1, otherReliefs: 0 });
@@ -31,8 +38,8 @@ const exAfter = netTaxFromChargeable(YA2026, ex.chargeable - exMoves);
 const exSaving = Math.round((ex.tax - exAfter.netTax) * 100) / 100;
 
 type Tip = { slug: string; title: string; body: string; limit: number };
-const tips: Tip[] = zh
-  ? [
+const tips: Tip[] = L(
+  [
       { slug: 'lifestyle', limit: 2_500, title: '换手机、电脑、平板', body: '早就想换的话，在 12 月 31 日前买，算进生活方式减免。网络费、书、电子书也在这一项。' },
       { slug: 'lifestyle', limit: 2_500, title: '检查网络和手机账单', body: '以本人名义付的家里宽频和手机配套都能报。一年下来通常有 RM1,000–1,500，很多人忘了报。' },
       { slug: 'medical', limit: 1_000, title: '全家体检', body: '全身体检、心理健康咨询、血压计、血糖仪等自我监测设备，算进医药减免里的 RM1,000 子项。' },
@@ -45,8 +52,8 @@ const tips: Tip[] = zh
       { slug: 'parents', limit: 1_000, title: '带父母体检', body: '父母医药减免最高 RM8,000，其中体检和疫苗可报 RM1,000。' },
       { slug: 'tourism', limit: 1_000, title: '去玩也能扣税', body: 'YA2026 新增：博物馆、动物园、主题乐园、国家公园、文化表演的门票，最高 RM1,000。' },
       { slug: 'ev-charging', limit: 2_500, title: '装家用 CCTV 或厨余粉碎机', body: 'YA2026–2027 新增到环保与居家安全减免（RM2,500），两年内限报一次。' },
-    ]
-  : [
+  ],
+  [
       { slug: 'lifestyle', limit: 2_500, title: 'Upgrade your phone, laptop or tablet', body: 'If you were going to anyway, buy before 31 December and claim it under the lifestyle relief — along with internet bills, books and e-books.' },
       { slug: 'lifestyle', limit: 2_500, title: 'Add up your internet and phone bills', body: 'Home broadband and mobile plans in your name both count. That’s often RM1,000–1,500 a year that people forget.' },
       { slug: 'medical', limit: 1_000, title: 'Family health check-ups', body: 'Full check-ups, mental-health consultations and self-monitoring devices (BP monitors, glucose meters) use the RM1,000 check-up sub-limit.' },
@@ -59,19 +66,40 @@ const tips: Tip[] = zh
       { slug: 'parents', limit: 1_000, title: 'Check-ups for your parents', body: 'The parents relief goes up to RM8,000, including RM1,000 for check-ups and vaccines.' },
       { slug: 'tourism', limit: 1_000, title: 'Go out — it’s deductible', body: 'New for YA2026: tickets to museums, zoos, theme parks, national parks and cultural shows, up to RM1,000.' },
       { slug: 'ev-charging', limit: 2_500, title: 'Install home CCTV or a food waste grinder', body: 'Added to the RM2,500 sustainability & home-safety relief for YA2026–2027, once every 2 years.' },
-    ];
+  ],
+  [
+    { slug: 'lifestyle', limit: 2_500, title: 'Tukar telefon, komputer riba atau tablet', body: 'Jika memang bercadang menukarnya, beli sebelum 31 Disember dan tuntut di bawah pelepasan gaya hidup — bersama bil internet, buku dan e-buku.' },
+    { slug: 'lifestyle', limit: 2_500, title: 'Kira bil internet dan telefon anda', body: 'Jalur lebar rumah dan pelan mudah alih atas nama anda kedua-duanya layak. Selalunya RM1,000–1,500 setahun yang ramai terlupa tuntut.' },
+    { slug: 'medical', limit: 1_000, title: 'Pemeriksaan kesihatan keluarga', body: 'Pemeriksaan kesihatan penuh, konsultasi kesihatan mental dan alat pemantauan kendiri (alat tekanan darah, glukometer) menggunakan had kecil RM1,000.' },
+    { slug: 'medical', limit: 1_000, title: 'Ambil vaksin', body: 'Mulai YA2026 semua vaksin berdaftar NPRA layak (selesema, HPV, pneumokokus…), untuk anda, pasangan atau anak — had kecil RM1,000.' },
+    { slug: 'medical', limit: 1_000, title: 'Jumpa doktor gigi', body: 'Pemeriksaan dan rawatan pergigian mempunyai had kecil RM1,000 sendiri (bukan kosmetik).' },
+    { slug: 'sports', limit: 1_000, title: 'Peralatan sukan, gim, sewa gelanggang', body: 'Pelepasan sukan RM1,000 berasingan daripada gaya hidup. Peralatan seperti raket, keahlian gim, sewa kemudahan dan yuran pertandingan semuanya layak (kasut sukan hanya mulai YA2027).' },
+    { slug: 'prs', limit: 3_000, title: 'Tambah caruman PRS', body: 'Langkah klasik hujung tahun: caruman ke Skim Persaraan Swasta menjimatkan cukai mengikut kadar marginal anda. Pengeluaran sebelum umur 55 dikenakan cukai 8%.' },
+    { slug: 'sspn', limit: 8_000, title: 'Simpan dalam SSPN', body: 'Ibu bapa boleh menolak sehingga RM8,000 simpanan bersih SSPN. Wang tetap milik anda, disimpan untuk pendidikan anak.' },
+    { slug: 'life-insurance', limit: 3_000, title: 'Semak premium insurans anda', body: 'Insurans hayat (RM3,000) dan insurans perubatan/pendidikan (RM4,000) mempunyai had berasingan. Mulai YA2026 polisi hayat anak juga layak.' },
+    { slug: 'parents', limit: 1_000, title: 'Pemeriksaan kesihatan untuk ibu bapa', body: 'Pelepasan ibu bapa sehingga RM8,000, termasuk RM1,000 untuk pemeriksaan kesihatan dan vaksin.' },
+    { slug: 'tourism', limit: 1_000, title: 'Berjalan-jalan pun boleh tolak cukai', body: 'Baharu untuk YA2026: tiket ke muzium, zoo, taman tema, taman negara dan persembahan budaya, sehingga RM1,000.' },
+    { slug: 'ev-charging', limit: 2_500, title: 'Pasang CCTV rumah atau pengisar sisa makanan', body: 'Ditambah ke pelepasan kelestarian & keselamatan rumah RM2,500 untuk YA2026–2027, sekali dalam 2 tahun.' },
+  ],
+);
 
-const faqs = zh
-  ? [
+const faqs = L(
+  [
       { q: '花钱只为了扣税划算吗？', a: '不划算。花 RM100 最多只省 RM30（边际税率 30% 时），一般人是省 RM6–RM25。只把本来就要花的钱安排在年底前付，或者用 PRS、SSPN 这类储蓄型减免。' },
       { q: '12 月 31 日之后付的钱可以报 YA2026 吗？', a: '不行。减免按付款日期算，2027 年 1 月 1 日之后付的要在 YA2027 报。' },
       { q: '分期付款买的手机怎么报？', a: '按当年实际付了多少来报。今年付的分期款算今年的生活方式减免。' },
-    ]
-  : [
+  ],
+  [
       { q: 'Is it worth spending just to get a relief?', a: 'No. RM100 of spending saves at most RM30 (at the 30% band) — usually RM6–25. Only time spending you’d do anyway, or use savings-type reliefs like PRS and SSPN.' },
       { q: 'Can I claim YA2026 for something paid after 31 December?', a: 'No. Reliefs follow the payment date — anything paid from 1 January 2027 goes into YA2027.' },
       { q: 'How do I claim a phone bought on instalments?', a: 'Claim what you actually paid in the year. This year’s instalments count towards this year’s lifestyle relief.' },
-    ];
+  ],
+  [
+    { q: 'Berbaloikah berbelanja semata-mata untuk pelepasan?', a: 'Tidak. Belanja RM100 menjimatkan paling banyak RM30 (pada kadar 30%) — biasanya RM6–25. Hanya awalkan perbelanjaan yang memang akan dibuat, atau gunakan pelepasan jenis simpanan seperti PRS dan SSPN.' },
+    { q: 'Bolehkah saya tuntut YA2026 untuk bayaran selepas 31 Disember?', a: 'Tidak. Pelepasan mengikut tarikh bayaran — apa-apa yang dibayar mulai 1 Januari 2027 masuk ke YA2027.' },
+    { q: 'Bagaimana menuntut telefon yang dibeli secara ansuran?', a: 'Tuntut jumlah yang benar-benar dibayar dalam tahun tersebut. Ansuran tahun ini dikira untuk pelepasan gaya hidup tahun ini.' },
+  ],
+);
 const url = absolute(href(lang, path), Astro.site);
 ---
 
@@ -79,22 +107,28 @@ const url = absolute(href(lang, path), Astro.site);
   <PageHeader
     lang={lang}
     title={title}
-    intro={zh ? 'YA2026 的减免只算 2026 年 12 月 31 日前付的钱。下面 12 招按「最容易做到」排序，每一招都标了上限。' : 'YA2026 reliefs only count money paid by 31 December 2026. These 12 moves are ordered from easiest, each with its limit.'}
+    intro={L(
+      'YA2026 的减免只算 2026 年 12 月 31 日前付的钱。下面 12 招按「最容易做到」排序，每一招都标了上限。',
+      'YA2026 reliefs only count money paid by 31 December 2026. These 12 moves are ordered from easiest, each with its limit.',
+      'Pelepasan YA2026 hanya mengira wang yang dibayar sebelum 31 Disember 2026. 12 langkah ini disusun dari yang paling mudah, setiap satu dengan hadnya.',
+    )}
     crumbs={[
       { label: t(lang, 'nav.guides'), path: 'guides/' },
-      { label: zh ? '年底省税 12 招' : '12 year-end moves', path },
+      { label: L('年底省税 12 招', '12 year-end moves', '12 langkah hujung tahun'), path },
     ]}
   />
   <div class="max-w-5xl mx-auto px-4 py-8">
     <article class="prose-lite max-w-3xl">
       <p>
-        {zh
-          ? `举例：月薪 RM8,000、一个月花红的单身人士，只有基本减免时 YA2026 税额约 ${rm(ex.tax)}。如果年底前用满生活方式（RM2,500）、运动（RM1,000）、PRS（RM3,000），再加上体检和疫苗（RM2,000），税额降到约 ${rm(exAfter.netTax)}——省下 ${rm(exSaving)}。`
-          : `Example: single, RM8,000 a month plus a one-month bonus, basic reliefs only — YA2026 tax is about ${rm(ex.tax)}. Max out lifestyle (RM2,500), sports (RM1,000) and PRS (RM3,000), plus check-ups and vaccines (RM2,000), and it drops to about ${rm(exAfter.netTax)} — ${rm(exSaving)} saved.`}
+        {L(
+          `举例：月薪 RM8,000、一个月花红的单身人士，只有基本减免时 YA2026 税额约 ${rm(ex.tax)}。如果年底前用满生活方式（RM2,500）、运动（RM1,000）、PRS（RM3,000），再加上体检和疫苗（RM2,000），税额降到约 ${rm(exAfter.netTax)}——省下 ${rm(exSaving)}。`,
+          `Example: single, RM8,000 a month plus a one-month bonus, basic reliefs only — YA2026 tax is about ${rm(ex.tax)}. Max out lifestyle (RM2,500), sports (RM1,000) and PRS (RM3,000), plus check-ups and vaccines (RM2,000), and it drops to about ${rm(exAfter.netTax)} — ${rm(exSaving)} saved.`,
+          `Contoh: bujang, gaji RM8,000 sebulan dengan bonus sebulan, pelepasan asas sahaja — cukai YA2026 kira-kira ${rm(ex.tax)}. Gunakan sepenuhnya gaya hidup (RM2,500), sukan (RM1,000) dan PRS (RM3,000), serta pemeriksaan kesihatan dan vaksin (RM2,000), dan cukai turun kepada kira-kira ${rm(exAfter.netTax)} — jimat ${rm(exSaving)}.`,
+        )}
       </p>
       <p>
-        {zh ? '想直接算你自己的？用' : 'Want your own numbers? Use the'}
-        <a href={href(lang, 'year-end-planner/')}>{zh ? '年底省税规划器' : 'year-end planner'}</a>{zh ? '。' : '.'}
+        {L('想直接算你自己的？用', 'Want your own numbers? Use the', 'Mahu kira sendiri? Gunakan')}{' '}
+        <a href={href(lang, 'year-end-planner/')}>{L('年底省税规划器', 'year-end planner', 'perancang hujung tahun')}</a>{L('。', '.', '.')}
       </p>
       {
         tips.map((tip, i) => (
@@ -105,20 +139,22 @@ const url = absolute(href(lang, path), Astro.site);
             <p>{tip.body}</p>
             <p class="text-sm">
               <a href={href(lang, `reliefs/${tip.slug}/`)}>
-                {zh ? `查看详细条件（上限 ${rm(tip.limit)}）→` : `Full conditions (limit ${rm(tip.limit)}) →`}
+                {L(`查看详细条件（上限 ${rm(tip.limit)}）→`, `Full conditions (limit ${rm(tip.limit)}) →`, `Syarat penuh (had ${rm(tip.limit)}) →`)}
               </a>
             </p>
           </section>
         ))
       }
-      <h2>{zh ? '最后：收据怎么管？' : 'Finally: keeping receipts'}</h2>
+      <h2>{L('最后：收据怎么管？', 'Finally: keeping receipts', 'Akhir sekali: menyimpan resit')}</h2>
       <p>
-        {zh
-          ? '报税时不需要上传收据，但 LHDN 可以在 7 年内要求查看。建议每张收据拍照存到同一个文件夹，并在购买时要求 e-Invoice（提供身份证号码）——LHDN 正在试行用 e-Invoice 资料自动预填 YA2026 的减免。'
-          : 'You don’t upload receipts when filing, but LHDN can ask for them for 7 years. Photograph every receipt into one folder and ask for an e-Invoice (give your IC number) — LHDN is piloting pre-filled reliefs from e-Invoice data for YA2026.'}
+        {L(
+          '报税时不需要上传收据，但 LHDN 可以在 7 年内要求查看。建议每张收据拍照存到同一个文件夹，并在购买时要求 e-Invoice（提供身份证号码）——LHDN 正在试行用 e-Invoice 资料自动预填 YA2026 的减免。',
+          'You don’t upload receipts when filing, but LHDN can ask for them for 7 years. Photograph every receipt into one folder and ask for an e-Invoice (give your IC number) — LHDN is piloting pre-filled reliefs from e-Invoice data for YA2026.',
+          'Anda tidak perlu memuat naik resit semasa memfailkan cukai, tetapi LHDN boleh memintanya dalam tempoh 7 tahun. Ambil gambar setiap resit dan simpan dalam satu folder, serta minta e-Invois (berikan nombor kad pengenalan) — LHDN sedang merintis pengisian automatik pelepasan YA2026 menggunakan data e-Invois.',
+        )}
       </p>
     </article>
     <ToolkitCta lang={lang} />
-    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+    <Faq title={L('常见问题', 'FAQ', 'Soalan lazim')} items={faqs} />
   </div>
 </Base>

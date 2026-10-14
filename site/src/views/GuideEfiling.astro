@@ -5,6 +5,7 @@ import Faq from '../components/Faq.astro';
 import ToolkitCta from '../components/ToolkitCta.astro';
 import { CONFIG } from '../config';
 import { absolute, href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { t } from '../i18n/ui';
 import { articleLd, faqLd } from '../lib/jsonld';
 import type { Lang } from '../lib/tax/types';
@@ -13,15 +14,21 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = 'guides/e-filing/';
-const title = zh ? 'e-Filing 报税教程：YA2026 怎么在 MyTax 报个人所得税（2027）' : 'How to File Your Malaysian Income Tax Online (e-Filing YA2026, 2027 Guide)';
-const description = zh
-  ? '第一次报税也看得懂：确认税号、首次登录 MyTax、填写 e-BE 表格、报减免、提交和查退税。附截止日期和准备清单。'
-  : 'A plain-language guide to filing Form BE on MyTax: checking your tax number, first login, filling in e-BE, claiming reliefs, submitting and tracking your refund.';
+const title = L(
+  'e-Filing 报税教程：YA2026 怎么在 MyTax 报个人所得税（2027）',
+  'How to File Your Malaysian Income Tax Online (e-Filing YA2026, 2027 Guide)',
+  'Cara e-Filing Cukai Pendapatan di MyTax (YA2026, Panduan 2027)',
+);
+const description = L(
+  '第一次报税也看得懂：确认税号、首次登录 MyTax、填写 e-BE 表格、报减免、提交和查退税。附截止日期和准备清单。',
+  'A plain-language guide to filing Form BE on MyTax: checking your tax number, first login, filling in e-BE, claiming reliefs, submitting and tracking your refund.',
+  'Panduan mudah memfailkan Borang BE di MyTax: semak nombor cukai, log masuk kali pertama, isi e-BE, tuntut pelepasan, hantar dan jejak bayaran balik.',
+);
 
-const steps = zh
-  ? [
+const steps = L(
+  [
       { h: '准备资料', p: '雇主发的 EA 表格（每年 2 月底前发出）、各项减免的收据或结单（保险、PRS、SSPN、医药、生活方式等）、银行户口号码（用来收退税）。' },
       { h: '确认你的税号（TIN）', p: '2023 年起，18 岁以上的马来西亚公民和永久居民会自动获得税号。在 MyTax 网站输入身份证号码就能查。没有的话，用 MyTax 上的 e-Daftar 在线登记。' },
       { h: '第一次登录 MyTax', p: '首次登录需要 PIN 号码，可以通过 MyTax 的 e-KYC（手机拍身份证和自拍）、在线申请，或到 LHDN 分行领取。拿到后在「First Time Login」设置自己的密码和安全图片。' },
@@ -32,8 +39,8 @@ const steps = zh
       { h: '填写已扣的 PCB 和天课', p: 'PCB 总额在 EA 表格上。系统会自动算出你要补税还是退税。' },
       { h: '检查并签名提交', p: '在摘要页检查一遍，用密码作数字签名后提交，保存或打印确认收据（acknowledgement）。' },
       { h: '查退税', p: '多扣的税会退到你填的银行户口。可以在 MyTax 查看状态。' },
-    ]
-  : [
+  ],
+  [
       { h: 'Gather your documents', p: 'Your EA form from your employer (issued by the end of February), receipts or statements for reliefs (insurance, PRS, SSPN, medical, lifestyle…) and your bank account number for refunds.' },
       { h: 'Check your tax number (TIN)', p: 'Since 2023, Malaysian citizens and PRs aged 18+ are given a TIN automatically. Enter your IC number on MyTax to check. If you have none, register online with e-Daftar.' },
       { h: 'Log in to MyTax for the first time', p: 'A first-time login needs a PIN, which you can get through e-KYC in MyTax (photo of your IC plus a selfie), an online request, or at an LHDN branch. Then use “First Time Login” to set your password and security image.' },
@@ -44,21 +51,41 @@ const steps = zh
       { h: 'Enter PCB and zakat already paid', p: 'Total PCB is on the EA form. The system then shows whether you owe tax or get a refund.' },
       { h: 'Review, sign and submit', p: 'Check the summary page, sign digitally with your password, submit, and save the acknowledgement receipt.' },
       { h: 'Track your refund', p: 'Over-deducted tax is refunded to the bank account you entered. You can follow the status on MyTax.' },
-    ];
+  ],
+  [
+    { h: 'Sediakan dokumen', p: 'Borang EA daripada majikan (dikeluarkan sebelum akhir Februari), resit atau penyata untuk pelepasan (insurans, PRS, SSPN, perubatan, gaya hidup…) dan nombor akaun bank untuk bayaran balik.' },
+    { h: 'Semak nombor cukai (TIN) anda', p: 'Sejak 2023, warganegara Malaysia dan PR berumur 18 tahun ke atas diberi TIN secara automatik. Masukkan nombor kad pengenalan di MyTax untuk menyemak. Jika tiada, daftar dalam talian melalui e-Daftar.' },
+    { h: 'Log masuk MyTax kali pertama', p: 'Log masuk kali pertama memerlukan PIN, yang boleh diperoleh melalui e-KYC dalam MyTax (gambar kad pengenalan dan swafoto), permohonan dalam talian, atau di cawangan LHDN. Kemudian gunakan “First Time Login” untuk menetapkan kata laluan dan imej keselamatan.' },
+    { h: 'Buka borang e-BE', p: 'Pergi ke ezHASiL Services → e-Filing → e-Form dan pilih “e-BE” (pemastautin tanpa pendapatan perniagaan) untuk Tahun Taksiran 2026. Jika ada pendapatan perniagaan, gunakan e-B.' },
+    { h: 'Semak maklumat peribadi', p: 'Sahkan alamat, status perkahwinan dan maklumat bank. Jika pasangan tiada pendapatan atau anda memilih taksiran bersama, tetapkan di sini.' },
+    { h: 'Masukkan pendapatan', p: 'Salin pendapatan penggajian daripada Borang EA (bonus dan elaun sudah termasuk). Tambah pendapatan lain seperti sewa atau kerja sampingan.' },
+    { h: 'Masukkan pelepasan', p: 'Isi setiap pelepasan. Hanya pelepasan individu diisi secara automatik — selebihnya terpulang kepada anda, dan di sinilah ramai orang terlepas tuntutan. Tidak pasti apa yang layak? Semak senarai pelepasan kami.' },
+    { h: 'Masukkan PCB dan zakat yang sudah dibayar', p: 'Jumlah PCB ada dalam Borang EA. Sistem kemudian menunjukkan sama ada anda dapat bayaran balik atau perlu membayar baki.' },
+    { h: 'Semak, tandatangan dan hantar', p: 'Semak halaman ringkasan, tandatangan secara digital dengan kata laluan, hantar dan simpan resit pengesahan penerimaan.' },
+    { h: 'Jejak bayaran balik', p: 'Bayaran balik dimasukkan ke akaun bank yang anda nyatakan; semak statusnya di MyTax.' },
+  ],
+);
 
-const faqs = zh
-  ? [
+const faqs = L(
+  [
       { q: 'YA2026 什么时候可以报？截止日期是？', a: '除非 LHDN 另行宣布，e-Filing 一般在每年 3 月 1 日开放。BE 表格的截止日期是 4 月 30 日，用 e-Filing 通常有宽限到 5 月 15 日。以 LHDN 公布为准。' },
       { q: '收据要上传吗？', a: '不用。但要保留 7 年，LHDN 抽查时要能拿出来。' },
       { q: '迟交会怎样？', a: '迟交或少报都可能被罚款。来不及的话，先提交、之后再用修正申报（amended return）补正，比不交好。' },
       { q: 'e-Invoice 和报税有什么关系？', a: 'LHDN 鼓励买东西时要求 e-Invoice（提供身份证号码），并正在试行用 e-Invoice 资料为 YA2026 自动预填减免。即使有预填，也要自己核对。' },
-    ]
-  : [
+  ],
+  [
       { q: 'When can I file YA2026, and what’s the deadline?', a: 'Unless LHDN says otherwise, e-Filing opens on 1 March. The Form BE deadline is 30 April, usually with an e-Filing grace period to 15 May. Check LHDN’s announcement.' },
       { q: 'Do I upload receipts?', a: 'No, but keep them for 7 years in case LHDN audits you.' },
       { q: 'What happens if I file late?', a: 'Late filing or under-reporting can lead to penalties. If you’re short on time, file first and correct it with an amended return later.' },
       { q: 'What does e-Invoice have to do with filing?', a: 'LHDN encourages you to request e-Invoices (give your IC number) and is piloting pre-filled reliefs from e-Invoice data for YA2026. Always check pre-filled figures yourself.' },
-    ];
+  ],
+  [
+    { q: 'Bilakah YA2026 boleh difailkan dan apakah tarikh akhirnya?', a: 'Kecuali LHDN mengumumkan sebaliknya, e-Filing biasanya dibuka pada 1 Mac. Tarikh akhir Borang BE ialah 30 April, biasanya dengan tempoh lanjutan e-Filing hingga 15 Mei. Rujuk pengumuman LHDN.' },
+    { q: 'Perlukah saya memuat naik resit?', a: 'Tidak, tetapi simpan selama 7 tahun sekiranya LHDN mengaudit anda.' },
+    { q: 'Apa berlaku jika saya lewat memfailkan?', a: 'Pemfailan lewat atau kurang lapor boleh dikenakan penalti. Jika masa suntuk, failkan dahulu dan betulkan kemudian melalui borang pindaan.' },
+    { q: 'Apa kaitan e-Invois dengan pemfailan cukai?', a: 'LHDN menggalakkan anda meminta e-Invois (berikan nombor kad pengenalan) dan sedang merintis pengisian automatik pelepasan YA2026 menggunakan data e-Invois. Sentiasa semak sendiri angka yang diisi automatik.' },
+  ],
+);
 const url = absolute(href(lang, path), Astro.site);
 ---
 
@@ -66,7 +93,11 @@ const url = absolute(href(lang, path), Astro.site);
   <PageHeader
     lang={lang}
     title={title}
-    intro={zh ? 'YA2026（2026 年的收入）在 2027 年 3 月开始报。只有薪水收入的人用 e-BE 表格，整个过程大约 20–30 分钟。' : 'YA2026 (income earned in 2026) is filed from March 2027. If you only have a salary you use Form e-BE — it takes about 20–30 minutes.'}
+    intro={L(
+      'YA2026（2026 年的收入）在 2027 年 3 月开始报。只有薪水收入的人用 e-BE 表格，整个过程大约 20–30 分钟。',
+      'YA2026 (income earned in 2026) is filed from March 2027. If you only have a salary you use Form e-BE — it takes about 20–30 minutes.',
+      'YA2026 (pendapatan tahun 2026) difailkan mulai Mac 2027. Jika anda hanya ada pendapatan gaji, gunakan Borang e-BE — ia mengambil masa kira-kira 20–30 minit.',
+    )}
     crumbs={[
       { label: t(lang, 'nav.guides'), path: 'guides/' },
       { label: 'e-Filing', path },
@@ -75,31 +106,37 @@ const url = absolute(href(lang, path), Astro.site);
   <div class="max-w-5xl mx-auto px-4 py-8">
     <article class="prose-lite max-w-3xl">
       <p class="text-sm bg-amber-50 border border-amber-200 rounded-lg p-3">
-        {zh
-          ? 'MyTax 的画面和登录方式偶尔会更新。本文以流程为主，具体按钮名称以 MyTax 网站为准。'
-          : 'MyTax screens and login methods change from time to time. This guide focuses on the flow — follow the labels on the MyTax site.'}
+        {L(
+          'MyTax 的画面和登录方式偶尔会更新。本文以流程为主，具体按钮名称以 MyTax 网站为准。',
+          'MyTax screens and login methods change from time to time. This guide focuses on the flow — follow the labels on the MyTax site.',
+          'Paparan dan cara log masuk MyTax kadang-kadang berubah. Panduan ini memberi tumpuan kepada aliran — ikut label di laman MyTax.',
+        )}
       </p>
       {
         steps.map((s, i) => (
           <section>
             <h2>
-              {zh ? `第 ${i + 1} 步：` : `Step ${i + 1}: `}
+              {L(`第 ${i + 1} 步：`, `Step ${i + 1}: `, `Langkah ${i + 1}: `)}
               {s.h}
             </h2>
             <p>{s.p}</p>
           </section>
         ))
       }
-      <h2>{zh ? '报税前先算一次' : 'Run the numbers before you file'}</h2>
+      <h2>{L('报税前先算一次', 'Run the numbers before you file', 'Kira dahulu sebelum memfailkan')}</h2>
       <p>
-        {zh ? '用' : 'Use the'} <a href={href(lang, 'tax-calculator/')}>{zh ? '个税计算器' : 'tax calculator'}</a>
-        {zh ? '先把减免填一遍，就知道大概会退多少，也能确认有没有漏报。' : ' with your reliefs first — you’ll know roughly what refund to expect and spot anything you missed.'}
+        {L('用', 'Use the', 'Gunakan')} <a href={href(lang, 'tax-calculator/')}>{L('个税计算器', 'tax calculator', 'kalkulator cukai')}</a>
+        {L(
+          '先把减免填一遍，就知道大概会退多少，也能确认有没有漏报。',
+          ' with your reliefs first — you’ll know roughly what refund to expect and spot anything you missed.',
+          ' dengan pelepasan anda dahulu — anda akan tahu anggaran bayaran balik dan boleh kesan apa-apa yang tertinggal.',
+        )}
       </p>
     </article>
     <ToolkitCta lang={lang} />
-    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+    <Faq title={L('常见问题', 'FAQ', 'Soalan lazim')} items={faqs} />
     <p class="mt-8 text-sm text-slate-600">
-      {zh ? '官方网站：' : 'Official site: '}
+      {L('官方网站：', 'Official site: ', 'Laman rasmi: ')}
       <a class="underline" href="https://mytax.hasil.gov.my/" rel="noopener" target="_blank">mytax.hasil.gov.my</a>
     </p>
   </div>

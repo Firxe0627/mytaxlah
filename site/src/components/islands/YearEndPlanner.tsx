@@ -5,6 +5,7 @@ import { planYearEnd, QUICK_MOVES, type PlanRow } from '../../lib/tax/planner';
 import { eisEmployee, epfEmployee, socsoEmployee } from '../../lib/tax/salary';
 import type { Claims, Lang, ReliefRule } from '../../lib/tax/types';
 import { t } from '../../i18n/ui';
+import { tri } from '../../i18n/tri';
 import type { MetaLite } from './TaxCalc';
 import { Checkbox, MoneyInput, Stepper, usePersisted } from './ui';
 
@@ -41,18 +42,18 @@ function daysLeft(): number {
   return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86_400_000));
 }
 
-const HOW: Record<string, { zh: string; en: string }> = {
-  lifestyle: { zh: '换手机/电脑、付网络费、买书', en: 'New phone or laptop, internet bills, books' },
-  sports: { zh: '运动器材、健身房、场地费', en: 'Sports gear, gym, court fees' },
-  prs: { zh: '投入私人退休计划（钱还是你的）', en: 'Top up a PRS (the money stays yours)' },
-  medical: { zh: '体检、打疫苗、看牙医（各 RM1,000）', en: 'Check-up, vaccines, dentist (RM1,000 each)' },
-  tourism: { zh: '景点、主题乐园、表演门票', en: 'Attraction, theme park and show tickets' },
-  parents: { zh: '带父母做全身体检', en: 'Full check-up for your parents' },
-  sspn: { zh: '存进孩子的 SSPN', en: 'Deposit into your child’s SSPN' },
+const HOW: Record<string, { zh: string; en: string; ms: string }> = {
+  lifestyle: { zh: '换手机/电脑、付网络费、买书', en: 'New phone or laptop, internet bills, books', ms: 'Telefon atau komputer riba baharu, bil internet, buku' },
+  sports: { zh: '运动器材、健身房、场地费', en: 'Sports gear, gym, court fees', ms: 'Peralatan sukan, gim, sewa gelanggang' },
+  prs: { zh: '投入私人退休计划（钱还是你的）', en: 'Top up a PRS (the money stays yours)', ms: 'Tambah caruman PRS (wang tetap milik anda)' },
+  medical: { zh: '体检、打疫苗、看牙医（各 RM1,000）', en: 'Check-up, vaccines, dentist (RM1,000 each)', ms: 'Pemeriksaan kesihatan, vaksin, doktor gigi (RM1,000 setiap satu)' },
+  tourism: { zh: '景点、主题乐园、表演门票', en: 'Attraction, theme park and show tickets', ms: 'Tiket tempat tarikan, taman tema dan persembahan' },
+  parents: { zh: '带父母做全身体检', en: 'Full check-up for your parents', ms: 'Pemeriksaan kesihatan penuh untuk ibu bapa' },
+  sspn: { zh: '存进孩子的 SSPN', en: 'Deposit into your child’s SSPN', ms: 'Simpan dalam SSPN anak anda' },
 };
 
 export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, toolkitPrice }: Props) {
-  const zh = lang === 'zh';
+  const L = tri(lang);
   const [s, setS] = usePersisted<State>('mtl.planner', { monthly: 6_000, bonusMonths: 1, otherIncome: 0, spouse: false, children: 0, spent: {} });
   const metaById = useMemo(() => new Map(meta.map((m) => [m.id, m])), [meta]);
   const quickIds = QUICK_MOVES.map((q) => q.id);
@@ -100,11 +101,15 @@ export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, to
           </div>
           <div class="text-right shrink-0">
             <p class="text-lg font-bold text-emerald-700 num">{rm(h.saving)}</p>
-            <p class="text-xs text-slate-500">{zh ? '可省' : 'saving'}</p>
+            <p class="text-xs text-slate-500">{L('可省', 'saving', 'jimat')}</p>
           </div>
         </div>
         <p class="text-xs text-slate-500 mt-2 num">
-          {zh ? `还可以用 ${rm(h.remaining)} · 每花 RM100 省 RM${per100.toFixed(0)}` : `${rm(h.remaining)} left · saves RM${per100.toFixed(0)} per RM100`}
+          {L(
+            `还可以用 ${rm(h.remaining)} · 每花 RM100 省 RM${per100.toFixed(0)}`,
+            `${rm(h.remaining)} left · saves RM${per100.toFixed(0)} per RM100`,
+            `Baki ${rm(h.remaining)} · jimat RM${per100.toFixed(0)} bagi setiap RM100`,
+          )}
         </p>
       </li>
     );
@@ -114,12 +119,12 @@ export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, to
     <div class="grid gap-6 lg:grid-cols-5 items-start">
       <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-4">
-          <p class="font-semibold text-slate-900">{zh ? '① 你的收入' : '① Your income'}</p>
+          <p class="font-semibold text-slate-900">{L('① 你的收入', '① Your income', '① Pendapatan anda')}</p>
           <MoneyInput id="ye-monthly" label={t(lang, 'calc.monthlySalary')} value={s.monthly} onChange={(v) => setS((p) => ({ ...p, monthly: v }))} />
           <Stepper id="ye-bonus" label={t(lang, 'calc.bonusMonths')} value={s.bonusMonths} onChange={(v) => setS((p) => ({ ...p, bonusMonths: v }))} step={0.5} max={12} />
           <MoneyInput
             id="ye-other"
-            label={zh ? '其他应课税收入（每年）' : 'Other taxable income (per year)'}
+            label={L('其他应课税收入（每年）', 'Other taxable income (per year)', 'Pendapatan bercukai lain (setahun)')}
             value={s.otherIncome}
             onChange={(v) => setS((p) => ({ ...p, otherIncome: v }))}
           />
@@ -130,9 +135,13 @@ export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, to
 
       <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 order-last lg:order-none space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-4">
-          <p class="font-semibold text-slate-900">{zh ? '② 今年已经花了 / 缴了多少？' : '② What have you already spent or paid this year?'}</p>
+          <p class="font-semibold text-slate-900">{L('② 今年已经花了 / 缴了多少？', '② What have you already spent or paid this year?', '② Berapa yang sudah dibelanjakan atau dibayar tahun ini?')}</p>
           <p class="text-xs text-slate-500 -mt-2">
-            {zh ? '填了会更准；不确定就留 0，之后再回来改（会自动保存在你的浏览器）。' : 'More accurate if you fill it in. Not sure? Leave 0 and come back — it’s saved in your browser.'}
+            {L(
+              '填了会更准；不确定就留 0，之后再回来改（会自动保存在你的浏览器）。',
+              'More accurate if you fill it in. Not sure? Leave 0 and come back — it’s saved in your browser.',
+              'Lebih tepat jika diisi. Tidak pasti? Biarkan 0 dan kembali kemudian — ia disimpan dalam pelayar anda.',
+            )}
           </p>
           {plannerRules.map((r) => (
             <MoneyInput
@@ -150,18 +159,22 @@ export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, to
       <div class="lg:col-span-3 lg:col-start-3 lg:row-start-1 lg:row-span-2 space-y-4" aria-live="polite">
         <div class="rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-500 text-white p-5">
           <p class="text-sm text-emerald-100">
-            {zh ? `距离 12 月 31 日还有 ${days} 天。做完下面这些常见操作，YA2026 可以少交` : `${days} days to 31 Dec. Do the common moves below and your YA2026 tax drops by`}
+            {L(
+              `距离 12 月 31 日还有 ${days} 天。做完下面这些常见操作，YA2026 可以少交`,
+              `${days} days to 31 Dec. Do the common moves below and your YA2026 tax drops by`,
+              `${days} hari lagi sebelum 31 Dis. Lakukan langkah biasa di bawah dan cukai YA2026 anda berkurang`,
+            )}
           </p>
           <p class="text-5xl font-extrabold mt-1 text-yellow-300 num">{rm(plan.quickTotal)}</p>
           <p class="text-sm text-emerald-50 mt-2">
-            {zh ? '目前预计 YA2026 税额' : 'Current estimated YA2026 tax'} <b class="num">{rm(plan.currentTax, true)}</b> · {t(lang, 'calc.marginalRate')}{' '}
+            {L('目前预计 YA2026 税额', 'Current estimated YA2026 tax', 'Anggaran cukai YA2026 semasa')} <b class="num">{rm(plan.currentTax, true)}</b> · {t(lang, 'calc.marginalRate')}{' '}
             <b>{plan.marginalRate}%</b>
           </p>
         </div>
 
         {plan.currentTax === 0 ? (
           <div class="bg-white rounded-2xl border border-slate-200 p-5 text-slate-700">
-            {zh ? '你目前预计不用交税，不需要为了减免额外花钱。' : 'You are not expected to pay tax this year — no need to spend for reliefs.'}
+            {L('你目前预计不用交税，不需要为了减免额外花钱。', 'You are not expected to pay tax this year — no need to spend for reliefs.', 'Anda dijangka tidak perlu membayar cukai tahun ini — tidak perlu berbelanja untuk pelepasan.')}
           </div>
         ) : (
           <>
@@ -169,7 +182,11 @@ export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, to
             {plan.others.length > 0 && (
               <details class="bg-white rounded-2xl border border-slate-200 p-4">
                 <summary class="cursor-pointer font-semibold text-slate-900">
-                  {zh ? `其他还有额度的减免（视你的情况，${plan.others.length} 项）` : `Other reliefs with room left (depends on your situation, ${plan.others.length})`}
+                  {L(
+                    `其他还有额度的减免（视你的情况，${plan.others.length} 项）`,
+                    `Other reliefs with room left (depends on your situation, ${plan.others.length})`,
+                    `Pelepasan lain yang masih berbaki (bergantung pada situasi anda, ${plan.others.length})`,
+                  )}
                 </summary>
                 <ul class="space-y-3 mt-3 p-0">{plan.others.map((h, i) => row(h, i, false))}</ul>
               </details>
@@ -178,21 +195,25 @@ export default function YearEndPlanner({ lang, meta, reliefsBase, toolkitUrl, to
         )}
 
         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-900">
-          {zh
-            ? '提醒：只为本来就需要的东西花钱。减免只是让你少交一部分税——花 RM100 最多省 RM30，不是白拿。PRS 和 SSPN 是储蓄，钱仍然是你的。'
-            : 'Only spend on things you actually need. A relief only cuts part of the tax — spending RM100 saves at most RM30. PRS and SSPN are savings: the money stays yours.'}
+          {L(
+            '提醒：只为本来就需要的东西花钱。减免只是让你少交一部分税——花 RM100 最多省 RM30，不是白拿。PRS 和 SSPN 是储蓄，钱仍然是你的。',
+            'Only spend on things you actually need. A relief only cuts part of the tax — spending RM100 saves at most RM30. PRS and SSPN are savings: the money stays yours.',
+            'Belanja hanya untuk perkara yang memang anda perlukan. Pelepasan hanya mengurangkan sebahagian cukai — belanja RM100 menjimatkan paling banyak RM30. PRS dan SSPN ialah simpanan: wang tetap milik anda.',
+          )}
         </div>
 
         {toolkitUrl && (
           <div class="bg-white rounded-2xl border-2 border-emerald-600 p-5">
-            <p class="font-semibold text-slate-900">{zh ? '想把每一项都用好？' : 'Want a checklist for every relief?'}</p>
+            <p class="font-semibold text-slate-900">{L('想把每一项都用好？', 'Want a checklist for every relief?', 'Mahu senarai semak untuk setiap pelepasan?')}</p>
             <p class="text-sm text-slate-600 mt-1">
-              {zh
-                ? '「YA2026 报税 + 省税工具包」：Excel 规划表自动算、每项减免要留的收据清单、e-Filing 中文步骤。'
-                : 'The YA2026 Tax Toolkit: an auto-calculating Excel planner, receipts checklist for every relief, and step-by-step e-Filing guide.'}
+              {L(
+                '「YA2026 报税 + 省税工具包」：Excel 规划表自动算、每项减免要留的收据清单、e-Filing 中文步骤。',
+                'The YA2026 Tax Toolkit: an auto-calculating Excel planner, receipts checklist for every relief, and step-by-step e-Filing guide.',
+                'Kit Cukai YA2026: perancang Excel automatik, senarai semak resit untuk setiap pelepasan dan panduan e-Filing langkah demi langkah (dalam bahasa Inggeris dan Cina).',
+              )}
             </p>
             <a href={toolkitUrl} class="inline-block mt-3 px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700" rel="noopener" target="_blank">
-              {zh ? `获取工具包 ${toolkitPrice}` : `Get the toolkit ${toolkitPrice}`}
+              {L(`获取工具包 ${toolkitPrice}`, `Get the toolkit ${toolkitPrice}`, `Dapatkan kit ${toolkitPrice}`)}
             </a>
           </div>
         )}

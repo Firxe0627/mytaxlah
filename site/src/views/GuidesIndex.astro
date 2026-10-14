@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { t } from '../i18n/ui';
 import type { Lang } from '../lib/tax/types';
 
@@ -9,18 +10,20 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = 'guides/';
-const title = zh ? '马来西亚个人所得税指南' : 'Malaysian Income Tax Guides';
-const description = zh
-  ? '2027 年预算案解读、YA2026 减免清单、年底省税方法、e-Filing 报税教程。'
-  : 'Budget 2027 explained, the YA2026 relief list, year-end tax moves and how to e-File.';
+const title = L('马来西亚个人所得税指南', 'Malaysian Income Tax Guides', 'Panduan Cukai Pendapatan Malaysia');
+const description = L(
+  '2027 年预算案解读、YA2026 减免清单、年底省税方法、e-Filing 报税教程。',
+  'Budget 2027 explained, the YA2026 relief list, year-end tax moves and how to e-File.',
+  'Penjelasan Bajet 2027, senarai pelepasan YA2026, langkah jimat cukai hujung tahun dan cara e-Filing.',
+);
 const guides = [
-  { path: 'budget-2027/', title: zh ? '2027 年预算案：个税改了什么、你能省多少' : 'Budget 2027: what changed and how much you save' },
-  { path: 'guides/year-end-tax-tips/', title: zh ? '2026 年底省税 12 招' : '12 ways to cut your tax before 31 December' },
-  { path: 'reliefs/', title: zh ? 'YA2026 个人所得税减免完整清单' : 'The complete YA2026 tax relief list' },
-  { path: 'guides/e-filing/', title: zh ? 'e-Filing 报税教程（YA2026）' : 'How to e-File your income tax (YA2026)' },
-  { path: 'salary/', title: zh ? '各档月薪到手与税额一览' : 'Take-home pay and tax for every salary' },
+  { path: 'budget-2027/', title: L('2027 年预算案：个税改了什么、你能省多少', 'Budget 2027: what changed and how much you save', 'Bajet 2027: apa yang berubah dan berapa anda jimat') },
+  { path: 'guides/year-end-tax-tips/', title: L('2026 年底省税 12 招', '12 ways to cut your tax before 31 December', '12 cara jimat cukai sebelum 31 Disember') },
+  { path: 'reliefs/', title: L('YA2026 个人所得税减免完整清单', 'The complete YA2026 tax relief list', 'Senarai lengkap pelepasan cukai YA2026') },
+  { path: 'guides/e-filing/', title: L('e-Filing 报税教程（YA2026）', 'How to e-File your income tax (YA2026)', 'Cara e-Filing cukai pendapatan (YA2026)') },
+  { path: 'salary/', title: L('各档月薪到手与税额一览', 'Take-home pay and tax for every salary', 'Gaji bersih dan cukai untuk setiap gaji') },
 ];
 ---
 

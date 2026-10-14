@@ -1,5 +1,5 @@
-export type Lang = 'zh' | 'en';
-export type L10n = { zh: string; en: string };
+export type Lang = 'zh' | 'en' | 'ms';
+export type L10n = { zh: string; en: string; ms: string };
 
 /** One marginal-rate band. `to: null` means no upper limit. Rate is in percent. */
 export interface Bracket {

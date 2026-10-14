@@ -28,12 +28,13 @@ export const PARTNERS: Partner[] = [
   {
     slug: 'demo',
     demo: true,
-    name: { zh: '示范顾问', en: 'Demo Advisor' },
-    title: { zh: '保险与 PRS 顾问（示范页面）', en: 'Insurance & PRS advisor (demo page)' },
+    name: { zh: '示范顾问', en: 'Demo Advisor', ms: 'Penasihat Demo' },
+    title: { zh: '保险与 PRS 顾问（示范页面）', en: 'Insurance & PRS advisor (demo page)', ms: 'Penasihat insurans & PRS (halaman demo)' },
     focus: ['lifeInsurance', 'eduMedInsurance', 'prs'],
     intro: {
       zh: '输入你的月薪，看看今年保险和 PRS 减免还能帮你省多少税。12 月 31 日前缴的保费和供款才算 YA2026。',
       en: 'Enter your salary to see how much tax your insurance and PRS reliefs can still save you. Only premiums and contributions paid by 31 December count for YA2026.',
+      ms: 'Masukkan gaji anda untuk melihat berapa banyak cukai yang masih boleh dijimatkan melalui pelepasan insurans dan PRS. Hanya premium dan caruman yang dibayar sebelum 31 Disember dikira untuk YA2026.',
     },
     color: '#0f766e',
   },

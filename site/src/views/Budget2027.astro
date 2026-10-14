@@ -9,6 +9,7 @@ import { YA2027 } from '../data/ya2027';
 import { metaFor } from '../data/reliefMeta';
 import { CONFIG } from '../config';
 import { absolute, href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { t } from '../i18n/ui';
 import { rm } from '../lib/format';
 import { compareYears } from '../lib/tax/compare';
@@ -20,14 +21,20 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = 'budget-2027/';
 const host = new URL(Astro.site ?? 'https://mytaxlah.com').host;
 
-const title = zh ? '2027 年预算案省税计算器：月薪多少能省多少税？' : 'Budget 2027 Tax Calculator: How Much Income Tax Will You Save?';
-const description = zh
-  ? '2027 年财政预算案把个人减免提高到 RM12,000，并下调 RM70k–150k 税率。输入月薪，马上算出 YA2027 你每年能少交多少所得税。'
-  : 'Budget 2027 raises the individual relief to RM12,000 and cuts rates for RM70k–150k. Enter your salary to see how much less income tax you pay from YA2027.';
+const title = L(
+  '2027 年预算案省税计算器：月薪多少能省多少税？',
+  'Budget 2027 Tax Calculator: How Much Income Tax Will You Save?',
+  'Kalkulator Cukai Bajet 2027: Berapa Banyak Cukai Pendapatan Anda Jimat?',
+);
+const description = L(
+  '2027 年财政预算案把个人减免提高到 RM12,000，并下调 RM70k–150k 税率。输入月薪，马上算出 YA2027 你每年能少交多少所得税。',
+  'Budget 2027 raises the individual relief to RM12,000 and cuts rates for RM70k–150k. Enter your salary to see how much less income tax you pay from YA2027.',
+  'Bajet 2027 menaikkan pelepasan individu kepada RM12,000 dan menurunkan kadar bagi RM70k–150k. Masukkan gaji anda untuk melihat berapa kurang cukai yang anda bayar mulai YA2027.',
+);
 
 const salaries = [3_000, 4_000, 5_000, 6_000, 7_000, 8_000, 10_000, 12_000, 15_000, 20_000, 30_000, 50_000];
 const table = salaries.map((m) => ({ m, ...compareYears(YA2026, YA2027, { monthly: m, bonusMonths: 0, otherReliefs: 0 }) }));
@@ -44,46 +51,51 @@ const bandRows = [
   ['400,001 – 600,000', '26%', '26%'],
   ['600,001 – 1,000,000', '28%', '28%'],
   ['1,000,001 – 2,000,000', '28%', '30% ↑'],
-  [zh ? '2,000,000 以上' : 'Above 2,000,000', '30%', '30%'],
+  [L('2,000,000 以上', 'Above 2,000,000', 'Melebihi 2,000,000'), '30%', '30%'],
 ];
 
 const changed = YA2027.reliefs.filter((r) => r.note);
 const zeroUntil = zeroTaxThreshold(YA2026);
 
-const faqs = zh
-  ? [
-      { q: '2027 年预算案的减税什么时候生效？', a: '从课税年 YA2027 开始，也就是 2027 年 1 月 1 日起赚的收入，在 2028 年报税时适用。你在 2027 年 3–5 月报的是 YA2026，仍然用 RM9,000 个人减免和旧税率。' },
-      { q: '这些改变已经确定了吗？', a: '目前还是提议，需要国会通过《财政法案》并在宪报公布后才正式生效。过去几年的预算案个税措施大多照案通过，但最终细节以法令为准。' },
-      { q: '我的 PCB（每月扣税）会马上减少吗？', a: 'PCB 是按每年的税率和减免计算的。新减免在 YA2027 生效，通常 LHDN 会在新的一年更新 PCB 计算规则，届时每月扣的税会相应减少。具体时间以 LHDN 公布为准。' },
-      { q: '月薪 RM3,000 的人能省多少？', a: '月薪 RM3,000 的单身人士在 YA2026 扣除减免和 RM400 回扣后本来就不用交税，所以没有额外节省。受惠最多的是应课税收入在 RM70,000 到 RM150,000 之间的中等收入人士。' },
-      { q: '谁会多交税？', a: '应课税收入超过 RM100 万的人。30% 最高税率的门槛从 RM200 万降到 RM100 万，RM100 万到 RM200 万之间的收入从 28% 提高到 30%。' },
-      { q: '除了个人减免，还有什么新的减免？', a: '提议包括：生活方式减免新增 AI 软件订阅和宠物领养/兽医费；运动减免新增运动鞋（RM300）；医药减免改为「健康与福祉」，新增月子/产后护理（RM3,000）；教育减免扩大到任何领域和孩子补习费；父母护理扩大到所有护理开支；国内旅游门票减免延长一年。' },
-    ]
-  : [
-      { q: 'When do the Budget 2027 tax cuts take effect?', a: 'From the year of assessment 2027 — income earned from 1 January 2027, filed in 2028. The return you file in March–May 2027 is for YA2026, which still uses the RM9,000 relief and current rates.' },
-      { q: 'Are these changes final?', a: 'They are proposals until Parliament passes the Finance Bill and it is gazetted. Personal tax measures in recent budgets have generally passed as announced, but the final law decides.' },
-      { q: 'Will my monthly PCB go down straight away?', a: 'PCB follows the rates and reliefs for each year. The new relief applies from YA2027, and LHDN normally updates its PCB rules for the new year, so monthly deductions should fall then. Check LHDN for the exact timing.' },
-      { q: 'How much does someone earning RM3,000 a month save?', a: 'A single person on RM3,000 a month already pays no tax for YA2026 after reliefs and the RM400 rebate, so there is no extra saving. The biggest winners are people with chargeable income between RM70,000 and RM150,000.' },
-      { q: 'Who pays more?', a: 'Anyone with chargeable income above RM1 million. The 30% top rate now starts at RM1 million instead of RM2 million, so income between RM1m and RM2m is taxed at 30% instead of 28%.' },
-      { q: 'What other reliefs are new?', a: 'Proposals include AI subscriptions and pet adoption/vet costs under lifestyle relief; sports shoes (RM300) under sports relief; medical relief renamed Health & Well-being with postnatal care (RM3,000); education relief widened to any field and children’s tuition; all care expenses for parents; and the domestic tourism relief extended by a year.' },
-    ];
+const faqs = L(
+  [
+    { q: '2027 年预算案的减税什么时候生效？', a: '从课税年 YA2027 开始，也就是 2027 年 1 月 1 日起赚的收入，在 2028 年报税时适用。你在 2027 年 3–5 月报的是 YA2026，仍然用 RM9,000 个人减免和旧税率。' },
+    { q: '这些改变已经确定了吗？', a: '目前还是提议，需要国会通过《财政法案》并在宪报公布后才正式生效。过去几年的预算案个税措施大多照案通过，但最终细节以法令为准。' },
+    { q: '我的 PCB（每月扣税）会马上减少吗？', a: 'PCB 是按每年的税率和减免计算的。新减免在 YA2027 生效，通常 LHDN 会在新的一年更新 PCB 计算规则，届时每月扣的税会相应减少。具体时间以 LHDN 公布为准。' },
+    { q: '月薪 RM3,000 的人能省多少？', a: '月薪 RM3,000 的单身人士在 YA2026 扣除减免和 RM400 回扣后本来就不用交税，所以没有额外节省。受惠最多的是应课税收入在 RM70,000 到 RM150,000 之间的中等收入人士。' },
+    { q: '谁会多交税？', a: '应课税收入超过 RM100 万的人。30% 最高税率的门槛从 RM200 万降到 RM100 万，RM100 万到 RM200 万之间的收入从 28% 提高到 30%。' },
+    { q: '除了个人减免，还有什么新的减免？', a: '提议包括：生活方式减免新增 AI 软件订阅和宠物领养/兽医费；运动减免新增运动鞋（RM300）；医药减免改为「健康与福祉」，新增月子/产后护理（RM3,000）；教育减免扩大到任何领域和孩子补习费；父母护理扩大到所有护理开支；国内旅游门票减免延长一年。' },
+  ],
+  [
+    { q: 'When do the Budget 2027 tax cuts take effect?', a: 'From the year of assessment 2027 — income earned from 1 January 2027, filed in 2028. The return you file in March–May 2027 is for YA2026, which still uses the RM9,000 relief and current rates.' },
+    { q: 'Are these changes final?', a: 'They are proposals until Parliament passes the Finance Bill and it is gazetted. Personal tax measures in recent budgets have generally passed as announced, but the final law decides.' },
+    { q: 'Will my monthly PCB go down straight away?', a: 'PCB follows the rates and reliefs for each year. The new relief applies from YA2027, and LHDN normally updates its PCB rules for the new year, so monthly deductions should fall then. Check LHDN for the exact timing.' },
+    { q: 'How much does someone earning RM3,000 a month save?', a: 'A single person on RM3,000 a month already pays no tax for YA2026 after reliefs and the RM400 rebate, so there is no extra saving. The biggest winners are people with chargeable income between RM70,000 and RM150,000.' },
+    { q: 'Who pays more?', a: 'Anyone with chargeable income above RM1 million. The 30% top rate now starts at RM1 million instead of RM2 million, so income between RM1m and RM2m is taxed at 30% instead of 28%.' },
+    { q: 'What other reliefs are new?', a: 'Proposals include AI subscriptions and pet adoption/vet costs under lifestyle relief; sports shoes (RM300) under sports relief; medical relief renamed Health & Well-being with postnatal care (RM3,000); education relief widened to any field and children’s tuition; all care expenses for parents; and the domestic tourism relief extended by a year.' },
+  ],
+  [
+    { q: 'Bilakah pengurangan cukai Bajet 2027 berkuat kuasa?', a: 'Mulai tahun taksiran 2027 — pendapatan yang diperoleh dari 1 Januari 2027 dan difailkan pada 2028. Borang yang anda failkan pada Mac–Mei 2027 ialah untuk YA2026, yang masih menggunakan pelepasan RM9,000 dan kadar semasa.' },
+    { q: 'Adakah perubahan ini sudah muktamad?', a: 'Ia masih cadangan sehingga Parlimen meluluskan Rang Undang-Undang Kewangan dan ia diwartakan. Langkah cukai individu dalam bajet beberapa tahun kebelakangan ini biasanya diluluskan seperti diumumkan, tetapi undang-undang muktamad yang menentukan.' },
+    { q: 'Adakah PCB bulanan saya akan turun serta-merta?', a: 'PCB mengikut kadar dan pelepasan bagi setiap tahun. Pelepasan baharu terpakai mulai YA2027, dan LHDN biasanya mengemas kini kaedah PCB untuk tahun baharu, jadi potongan bulanan sepatutnya turun ketika itu. Semak LHDN untuk tarikh sebenar.' },
+    { q: 'Berapa banyak penjimatan bagi gaji RM3,000 sebulan?', a: 'Individu bujang bergaji RM3,000 sebulan memang tidak membayar cukai untuk YA2026 selepas pelepasan dan rebat RM400, jadi tiada penjimatan tambahan. Yang paling untung ialah mereka yang berpendapatan bercukai antara RM70,000 dan RM150,000.' },
+    { q: 'Siapa yang membayar lebih?', a: 'Sesiapa yang berpendapatan bercukai melebihi RM1 juta. Kadar tertinggi 30% kini bermula pada RM1 juta, bukan RM2 juta, jadi pendapatan antara RM1 juta dan RM2 juta dikenakan 30%, bukan 28%.' },
+    { q: 'Apakah pelepasan baharu yang lain?', a: 'Cadangan termasuk langganan AI dan kos pengambilan haiwan peliharaan/doktor haiwan di bawah pelepasan gaya hidup; kasut sukan (RM300) di bawah pelepasan sukan; pelepasan perubatan dinamakan semula Kesihatan & Kesejahteraan dengan penjagaan selepas bersalin (RM3,000); pelepasan pendidikan diperluas kepada apa-apa bidang dan tuisyen anak; semua perbelanjaan penjagaan ibu bapa; dan pelepasan pelancongan domestik dilanjutkan setahun.' },
+  ],
+);
 
 const url = absolute(href(lang, path), Astro.site);
 ---
 
-<Base
-  lang={lang}
-  title={title}
-  description={description}
-  path={path}
-  jsonLd={[appLd(title, description, url, lang), faqLd(faqs)]}
->
+<Base lang={lang} title={title} description={description} path={path} jsonLd={[appLd(title, description, url, lang), faqLd(faqs)]}>
   <PageHeader
     lang={lang}
     title={title}
-    intro={zh
-      ? '2026 年 10 月 9 日公布的 2027 年财政预算案，把个人减免从 RM9,000 提高到 RM12,000（2010 年以来第一次），并把 RM70,001–150,000 的税率各降 1%。输入你的月薪，看看你能省多少。'
-      : 'Budget 2027, tabled on 9 October 2026, lifts the individual relief from RM9,000 to RM12,000 — the first increase since 2010 — and cuts rates on RM70,001–150,000 by one point. Enter your salary to see your saving.'}
+    intro={L(
+      '2026 年 10 月 9 日公布的 2027 年财政预算案，把个人减免从 RM9,000 提高到 RM12,000（2010 年以来第一次），并把 RM70,001–150,000 的税率各降 1%。输入你的月薪，看看你能省多少。',
+      'Budget 2027, tabled on 9 October 2026, lifts the individual relief from RM9,000 to RM12,000 — the first increase since 2010 — and cuts rates on RM70,001–150,000 by one point. Enter your salary to see your saving.',
+      'Bajet 2027 yang dibentangkan pada 9 Oktober 2026 menaikkan pelepasan individu daripada RM9,000 kepada RM12,000 — kenaikan pertama sejak 2010 — dan menurunkan kadar bagi RM70,001–150,000 sebanyak satu mata peratusan. Masukkan gaji anda untuk melihat penjimatan anda.',
+    )}
     crumbs={[{ label: t(lang, 'nav.budget2027'), path }]}
   />
 
@@ -98,31 +110,31 @@ const url = absolute(href(lang, path), Astro.site);
     />
 
     <article class="prose-lite mt-12 max-w-3xl">
-      <h2>{zh ? '不同月薪能省多少？' : 'How much do different salaries save?'}</h2>
+      <h2>{L('不同月薪能省多少？', 'How much do different salaries save?', 'Berapa penjimatan mengikut gaji?')}</h2>
       <p>
         {
-          zh
-            ? '以下按单身、没有花红、只计个人减免 + EPF + SOCSO/EIS 计算。有其他减免的话，节省金额可能会不同——用上面的计算器输入你的情况。'
-            : 'Single person, no bonus, only the individual relief + EPF + SOCSO/EIS. With other reliefs your saving may differ — use the calculator above.'
+          L(
+            '以下按单身、没有花红、只计个人减免 + EPF + SOCSO/EIS 计算。有其他减免的话，节省金额可能会不同——用上面的计算器输入你的情况。',
+            'Single person, no bonus, only the individual relief + EPF + SOCSO/EIS. With other reliefs your saving may differ — use the calculator above.',
+            'Individu bujang, tiada bonus, hanya pelepasan individu + KWSP + PERKESO/SIP. Jika ada pelepasan lain, penjimatan mungkin berbeza — gunakan kalkulator di atas.',
+          )
         }
       </p>
       <div class="table-scroll">
         <table class="num">
           <thead>
             <tr>
-              <th>{zh ? '月薪' : 'Monthly salary'}</th>
+              <th>{L('月薪', 'Monthly salary', 'Gaji bulanan')}</th>
               <th>YA2026</th>
               <th>YA2027</th>
-              <th>{zh ? '每年省' : 'Saving / year'}</th>
+              <th>{L('每年省', 'Saving / year', 'Jimat / tahun')}</th>
             </tr>
           </thead>
           <tbody>
             {
               table.map((r) => (
                 <tr>
-                  <td>
-                    {r.m <= 30_000 ? <a href={href(lang, `salary/rm${r.m}/`)}>{rm(r.m)}</a> : rm(r.m)}
-                  </td>
+                  <td>{r.m <= 30_000 ? <a href={href(lang, `salary/rm${r.m}/`)}>{rm(r.m)}</a> : rm(r.m)}</td>
                   <td>{rm(r.before.tax, true)}</td>
                   <td>{rm(r.after.tax, true)}</td>
                   <td>
@@ -135,67 +147,88 @@ const url = absolute(href(lang, path), Astro.site);
         </table>
       </div>
 
-      <h2>{zh ? '新旧税率对比' : 'Old vs new tax rates'}</h2>
+      <h2>{L('新旧税率对比', 'Old vs new tax rates', 'Kadar cukai lama vs baharu')}</h2>
       <p>
         {
-          zh
-            ? '税务居民的累进税率。RM70,001–100,000 从 19% 降到 18%；新设 RM100,001–150,000 一档，从 25% 降到 24%；RM100 万以上一律 30%。'
-            : 'Progressive rates for tax residents. RM70,001–100,000 falls from 19% to 18%; a new RM100,001–150,000 band falls from 25% to 24%; everything above RM1 million is taxed at 30%.'
+          L(
+            '税务居民的累进税率。RM70,001–100,000 从 19% 降到 18%；新设 RM100,001–150,000 一档，从 25% 降到 24%；RM100 万以上一律 30%。',
+            'Progressive rates for tax residents. RM70,001–100,000 falls from 19% to 18%; a new RM100,001–150,000 band falls from 25% to 24%; everything above RM1 million is taxed at 30%.',
+            'Kadar progresif untuk pemastautin cukai. RM70,001–100,000 turun daripada 19% kepada 18%; banjaran baharu RM100,001–150,000 turun daripada 25% kepada 24%; pendapatan melebihi RM1 juta dikenakan 30%.',
+          )
         }
       </p>
       <div class="table-scroll">
         <table class="num">
           <thead>
             <tr>
-              <th>{zh ? '应课税收入 (RM)' : 'Chargeable income (RM)'}</th>
+              <th>{L('应课税收入 (RM)', 'Chargeable income (RM)', 'Pendapatan bercukai (RM)')}</th>
               <th>YA2026</th>
               <th>YA2027</th>
             </tr>
           </thead>
-          <tbody>{bandRows.map(([band, a, b]) => <tr><td>{band}</td><td>{a}</td><td>{b}</td></tr>)}</tbody>
+          <tbody>
+            {
+              bandRows.map(([band, a, b]) => (
+                <tr>
+                  <td>{band}</td>
+                  <td>{a}</td>
+                  <td>{b}</td>
+                </tr>
+              ))
+            }
+          </tbody>
         </table>
       </div>
 
-      <h2>{zh ? '减免有什么变化？' : 'What changes for reliefs?'}</h2>
+      <h2>{L('减免有什么变化？', 'What changes for reliefs?', 'Apa perubahan pada pelepasan cukai?')}</h2>
       <ul>
         {
           changed.map((r) => (
             <li>
-              <a href={href(lang, `reliefs/${metaFor(r.id).slug}/`)}>{metaFor(r.id).name[lang]}</a>：{r.note![lang]}
+              <a href={href(lang, `reliefs/${metaFor(r.id).slug}/`)}>{metaFor(r.id).name[lang]}</a>
+              {L('：', ': ', ': ')}
+              {r.note![lang]}
             </li>
           ))
         }
       </ul>
 
-      <h2>{zh ? '谁受惠最多？' : 'Who benefits most?'}</h2>
+      <h2>{L('谁受惠最多？', 'Who benefits most?', 'Siapa yang paling untung?')}</h2>
       <p>
         {
-          zh
-            ? `每个人都多了 RM3,000 减免，所以省下的钱等于 RM3,000 × 你的边际税率：6% 档省 RM180、11% 档省 RM330、18% 档省 RM540。应课税收入在 RM70,000–150,000 的人还会因为税率下调再多省一点——Deloitte 估算 RM100,000 省约 RM840、RM150,000 省约 RM1,520。`
-            : `Everyone gets RM3,000 more relief, so the saving is RM3,000 × your marginal rate: RM180 at 6%, RM330 at 11%, RM540 at 18%. People with chargeable income between RM70,000 and RM150,000 also gain from the rate cuts — Deloitte estimates about RM840 at RM100,000 and RM1,520 at RM150,000.`
+          L(
+            '每个人都多了 RM3,000 减免，所以省下的钱等于 RM3,000 × 你的边际税率：6% 档省 RM180、11% 档省 RM330、18% 档省 RM540。应课税收入在 RM70,000–150,000 的人还会因为税率下调再多省一点——Deloitte 估算 RM100,000 省约 RM840、RM150,000 省约 RM1,520。',
+            'Everyone gets RM3,000 more relief, so the saving is RM3,000 × your marginal rate: RM180 at 6%, RM330 at 11%, RM540 at 18%. People with chargeable income between RM70,000 and RM150,000 also gain from the rate cuts — Deloitte estimates about RM840 at RM100,000 and RM1,520 at RM150,000.',
+            'Semua orang mendapat RM3,000 pelepasan tambahan, jadi penjimatan ialah RM3,000 × kadar marginal anda: RM180 pada 6%, RM330 pada 11%, RM540 pada 18%. Mereka yang berpendapatan bercukai antara RM70,000 dan RM150,000 juga untung daripada penurunan kadar — Deloitte menganggarkan kira-kira RM840 pada RM100,000 dan RM1,520 pada RM150,000.',
+          )
         }
       </p>
       <p>
         {
-          zh
-            ? `原本就不用交税的人（单身、月薪 ${rm(zeroUntil)} 以下）不会有额外节省。`
-            : `People who already pay nothing (single, earning under ${rm(zeroUntil)} a month) see no extra saving.`
+          L(
+            `原本就不用交税的人（单身、月薪 ${rm(zeroUntil)} 以下）不会有额外节省。`,
+            `People who already pay nothing (single, earning under ${rm(zeroUntil)} a month) see no extra saving.`,
+            `Mereka yang memang tidak membayar cukai (bujang, bergaji bawah ${rm(zeroUntil)} sebulan) tidak mendapat penjimatan tambahan.`,
+          )
         }
       </p>
 
-      <h2>{zh ? '现在可以做什么？' : 'What can you do now?'}</h2>
+      <h2>{L('现在可以做什么？', 'What can you do now?', 'Apa yang boleh dibuat sekarang?')}</h2>
       <p>
         {
-          zh ? (
+          L(
             <>
               新税率要到 YA2027 才生效，但 <strong>YA2026 的减免要在 2026 年 12 月 31 日前花掉才算</strong>。用
               <a href={href(lang, 'year-end-planner/')}>年底省税规划器</a>看看你今年还有哪些额度没用完。
-            </>
-          ) : (
+            </>,
             <>
-              The new rates start in YA2027, but <strong>YA2026 reliefs only count for money spent by 31 December 2026</strong>. Use the
+              The new rates start in YA2027, but <strong>YA2026 reliefs only count for money spent by 31 December 2026</strong>. Use the{' '}
               <a href={href(lang, 'year-end-planner/')}>year-end planner</a> to find the reliefs you haven’t used yet.
-            </>
+            </>,
+            <>
+              Kadar baharu bermula pada YA2027, tetapi <strong>pelepasan YA2026 hanya dikira untuk perbelanjaan sebelum 31 Disember 2026</strong>. Gunakan{' '}
+              <a href={href(lang, 'year-end-planner/')}>perancang hujung tahun</a> untuk mencari pelepasan yang belum digunakan.
+            </>,
           )
         }
       </p>
@@ -203,12 +236,20 @@ const url = absolute(href(lang, path), Astro.site);
 
     <ToolkitCta lang={lang} />
 
-    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+    <Faq title={L('常见问题', 'FAQ', 'Soalan lazim')} items={faqs} />
 
     <section class="mt-10 text-sm text-slate-600">
       <h2 class="font-semibold text-slate-900 mb-2">{t(lang, 'footer.sources')}</h2>
       <ul class="list-disc pl-5 space-y-1">
-        {[...YA2027.sources, ...YA2026.sources.slice(0, 1)].map((s) => <li><a class="underline" href={s.url} rel="noopener" target="_blank">{s.title}</a></li>)}
+        {
+          [...YA2027.sources, ...YA2026.sources.slice(0, 1)].map((s) => (
+            <li>
+              <a class="underline" href={s.url} rel="noopener" target="_blank">
+                {s.title}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </section>
   </div>

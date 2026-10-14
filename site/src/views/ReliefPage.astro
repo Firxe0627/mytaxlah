@@ -8,6 +8,7 @@ import { YA2026 } from '../data/ya2026';
 import { YA2027 } from '../data/ya2027';
 import { CONFIG } from '../config';
 import { absolute, href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { t } from '../i18n/ui';
 import { rm } from '../lib/format';
 import { articleLd, breadcrumbLd, faqLd } from '../lib/jsonld';
@@ -20,16 +21,16 @@ interface Props {
   slug: string;
 }
 const { lang, slug } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = `reliefs/${slug}/`;
 const metas = RELIEF_META.filter((m) => m.slug === slug);
 const main = metas[0];
 
-const COMBINED: Record<string, { zh: string; en: string }> = {
-  children: { zh: '孩子减免', en: 'Child relief' },
-  disabled: { zh: '残障人士相关减免', en: 'Reliefs for disabled individuals' },
-  'first-home-loan': { zh: '首购屋房贷利息减免', en: 'First home loan interest relief' },
-  socso: { zh: 'SOCSO 与 EIS 减免', en: 'SOCSO & EIS relief' },
+const COMBINED: Record<string, { zh: string; en: string; ms: string }> = {
+  children: { zh: '孩子减免', en: 'Child relief', ms: 'Pelepasan anak' },
+  disabled: { zh: '残障人士相关减免', en: 'Reliefs for disabled individuals', ms: 'Pelepasan untuk OKU' },
+  'first-home-loan': { zh: '首购屋房贷利息减免', en: 'First home loan interest relief', ms: 'Pelepasan faedah pinjaman rumah pertama' },
+  socso: { zh: 'SOCSO 与 EIS 减免', en: 'SOCSO & EIS relief', ms: 'Pelepasan PERKESO & SIP' },
 };
 const name = COMBINED[slug]?.[lang] ?? main.name[lang];
 const r26 = new Map(YA2026.reliefs.map((r) => [r.id, r]));
@@ -37,10 +38,12 @@ const r27 = new Map(YA2027.reliefs.map((r) => [r.id, r]));
 const mainRule = r26.get(main.id) ?? r27.get(main.id);
 const limitStr = mainRule ? rm(mainRule.limit) : '';
 
-const title = zh
-  ? `${name} YA2026：${limitStr ? `上限 ${limitStr}，` : ''}能报什么？`
-  : `${name} YA2026: ${limitStr ? `${limitStr} limit — ` : ''}what qualifies?`;
-const description = `${main.short[lang]} ${zh ? '详细条件、要保留的收据、用满能省多少税，以及 2027 年预算案的改变。' : 'Conditions, receipts to keep, how much tax it saves and Budget 2027 changes.'}`;
+const title = L(
+  `${name} YA2026：${limitStr ? `上限 ${limitStr}，` : ''}能报什么？`,
+  `${name} YA2026: ${limitStr ? `${limitStr} limit — ` : ''}what qualifies?`,
+  `${name} YA2026: ${limitStr ? `had ${limitStr} — ` : ''}apa yang layak dituntut?`,
+);
+const description = `${main.short[lang]} ${L('详细条件、要保留的收据、用满能省多少税，以及 2027 年预算案的改变。', 'Conditions, receipts to keep, how much tax it saves and Budget 2027 changes.', 'Syarat, resit yang perlu disimpan, berapa cukai dijimatkan dan perubahan Bajet 2027.')}`;
 
 // Savings table for amount-type reliefs: tax saved by using the full limit, at several salaries.
 const amountRule = metas.map((m) => r26.get(m.id)).find((r) => r && r.kind === 'amount');
@@ -62,13 +65,18 @@ const faqs = metas.flatMap((m) => {
   const items = [];
   if (a) {
     items.push({
-      q: zh ? `${m.name.zh}的上限是多少？` : `What is the limit for ${m.name.en.toLowerCase()}?`,
-      a: zh
-        ? `YA2026 上限 ${rm(a.limit)}${a.kind === 'count' ? '（每个孩子）' : ''}。${b ? `YA2027（提议）${rm(b.limit)}。` : ''}`
-        : `YA2026: ${rm(a.limit)}${a.kind === 'count' ? ' per child' : ''}. ${b ? `YA2027 (proposed): ${rm(b.limit)}.` : ''}`,
+      q: L(`${m.name.zh}的上限是多少？`, `What is the limit for ${m.name.en.toLowerCase()}?`, `Berapakah had ${m.name.ms.toLowerCase()}?`),
+      a: L(
+        `YA2026 上限 ${rm(a.limit)}${a.kind === 'count' ? '（每个孩子）' : ''}。${b ? `YA2027（提议）${rm(b.limit)}。` : ''}`,
+        `YA2026: ${rm(a.limit)}${a.kind === 'count' ? ' per child' : ''}. ${b ? `YA2027 (proposed): ${rm(b.limit)}.` : ''}`,
+        `YA2026: ${rm(a.limit)}${a.kind === 'count' ? ' bagi setiap anak' : ''}. ${b ? `YA2027 (cadangan): ${rm(b.limit)}.` : ''}`,
+      ),
     });
   }
-  items.push({ q: zh ? `${m.name.zh}要保留什么单据？` : `What records do I keep for ${m.name.en.toLowerCase()}?`, a: `${m.docs[lang]} ${zh ? 'LHDN 可以在 7 年内要求查看。' : 'LHDN can ask for them within 7 years.'}` });
+  items.push({
+    q: L(`${m.name.zh}要保留什么单据？`, `What records do I keep for ${m.name.en.toLowerCase()}?`, `Apakah rekod yang perlu disimpan untuk ${m.name.ms.toLowerCase()}?`),
+    a: `${m.docs[lang]} ${L('LHDN 可以在 7 年内要求查看。', 'LHDN can ask for them within 7 years.', 'LHDN boleh memintanya dalam tempoh 7 tahun.')}`,
+  });
   return items;
 });
 
@@ -113,40 +121,42 @@ const url = absolute(href(lang, path), Astro.site);
                 <div class="rounded-xl bg-emerald-50 p-4">
                   <p class="text-xs text-emerald-800">YA2026</p>
                   <p class="text-xl font-extrabold text-emerald-900 num">
-                    {a ? `${rm(a.limit)}${a.kind === 'count' ? (zh ? ' / 人' : ' each') : ''}` : '—'}
+                    {a ? `${rm(a.limit)}${a.kind === 'count' ? L(' / 人', ' each', ' seorang') : ''}` : '—'}
                   </p>
                 </div>
                 <div class="rounded-xl bg-slate-50 p-4">
                   <p class="text-xs text-slate-600">YA2027 ({t(lang, 'common.proposed')})</p>
                   <p class="text-xl font-extrabold text-slate-900 num">
-                    {b ? `${rm(b.limit)}${b.kind === 'count' ? (zh ? ' / 人' : ' each') : ''}` : m.id === 'breastfeeding' ? (zh ? '并入医药' : 'merged') : '—'}
+                    {b ? `${rm(b.limit)}${b.kind === 'count' ? L(' / 人', ' each', ' seorang') : ''}` : m.id === 'breastfeeding' ? L('并入医药', 'merged', 'digabung') : '—'}
                   </p>
                 </div>
               </div>
-              <h3>{zh ? '可以报什么？' : 'What qualifies?'}</h3>
+              <h3>{L('可以报什么？', 'What qualifies?', 'Apa yang layak?')}</h3>
               <ul>{m.covers[lang].map((c) => <li>{c}</li>)}</ul>
               {a?.parts && (
                 <>
-                  <h3>{zh ? 'YA2026 子项上限' : 'YA2026 sub-limits'}</h3>
+                  <h3>{L('YA2026 子项上限', 'YA2026 sub-limits', 'Had kecil YA2026')}</h3>
                   <ul>
                     {a.parts.map((p) => (
                       <li>
-                        {p.label[lang]}：{p.limit === null ? (zh ? `与总上限 ${rm(a.limit)} 共用` : `shares the ${rm(a.limit)} overall limit`) : rm(p.limit)}
+                        {p.label[lang]}
+                        {L('：', ': ', ': ')}
+                        {p.limit === null ? L(`与总上限 ${rm(a.limit)} 共用`, `shares the ${rm(a.limit)} overall limit`, `berkongsi had keseluruhan ${rm(a.limit)}`) : rm(p.limit)}
                       </li>
                     ))}
                   </ul>
                 </>
               )}
-              <h3>{zh ? '实用提示' : 'Tips'}</h3>
+              <h3>{L('实用提示', 'Tips', 'Tip')}</h3>
               <ul>{m.tips[lang].map((c) => <li>{c}</li>)}</ul>
-              <h3>{zh ? '要保留的单据' : 'Records to keep'}</h3>
+              <h3>{L('要保留的单据', 'Records to keep', 'Rekod untuk disimpan')}</h3>
               <p>{m.docs[lang]}</p>
               {(a?.note || b?.note) && (
                 <>
-                  <h3>{zh ? '今年和明年的改变' : 'What’s changing'}</h3>
+                  <h3>{L('今年和明年的改变', 'What’s changing', 'Apa yang berubah')}</h3>
                   <ul>
-                    {a?.note && <li><strong>YA2026：</strong>{a.note[lang]}</li>}
-                    {b?.note && <li><strong>YA2027：</strong>{b.note[lang]}</li>}
+                    {a?.note && <li><strong>YA2026{L('：', ': ', ': ')}</strong>{a.note[lang]}</li>}
+                    {b?.note && <li><strong>YA2027{L('：', ': ', ': ')}</strong>{b.note[lang]}</li>}
                   </ul>
                 </>
               )}
@@ -158,19 +168,21 @@ const url = absolute(href(lang, path), Astro.site);
       {
         savingRows.length > 0 && amountRule && (
           <section>
-            <h2>{zh ? `用满 ${rm(amountRule.limit)} 能省多少税？` : `How much tax does the full ${rm(amountRule.limit)} save?`}</h2>
+            <h2>{L(`用满 ${rm(amountRule.limit)} 能省多少税？`, `How much tax does the full ${rm(amountRule.limit)} save?`, `Berapa cukai dijimatkan dengan ${rm(amountRule.limit)} penuh?`)}</h2>
             <p>
-              {zh
-                ? '按单身、没有花红、只有基本减免估算。省下的税 ≈ 用掉的额度 × 你的边际税率。'
-                : 'Single, no bonus, basic reliefs only. Tax saved ≈ amount claimed × your marginal rate.'}
+              {L(
+                '按单身、没有花红、只有基本减免估算。省下的税 ≈ 用掉的额度 × 你的边际税率。',
+                'Single, no bonus, basic reliefs only. Tax saved ≈ amount claimed × your marginal rate.',
+                'Bujang, tiada bonus, pelepasan asas sahaja. Cukai dijimatkan ≈ jumlah dituntut × kadar marginal anda.',
+              )}
             </p>
             <div class="table-scroll">
               <table class="num">
                 <thead>
                   <tr>
-                    <th>{zh ? '月薪' : 'Monthly salary'}</th>
+                    <th>{L('月薪', 'Monthly salary', 'Gaji bulanan')}</th>
                     <th>{t(lang, 'calc.marginalRate')}</th>
-                    <th>{zh ? '可省税' : 'Tax saved'}</th>
+                    <th>{L('可省税', 'Tax saved', 'Cukai dijimatkan')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -195,13 +207,13 @@ const url = absolute(href(lang, path), Astro.site);
     </div>
 
     <ToolkitCta lang={lang} />
-    <Faq title={zh ? '常见问题' : 'FAQ'} items={faqs} />
+    <Faq title={L('常见问题', 'FAQ', 'Soalan lazim')} items={faqs} />
 
     {
       related.length > 0 && (
         <section class="mt-10">
           <h2 class="text-lg font-bold text-slate-900 mb-3">
-            {zh ? `其他${GROUP_NAMES[main.group].zh}减免` : `More ${GROUP_NAMES[main.group].en.toLowerCase()} reliefs`}
+            {L(`其他${GROUP_NAMES[main.group].zh}减免`, `More ${GROUP_NAMES[main.group].en.toLowerCase()} reliefs`, `Pelepasan lain: ${GROUP_NAMES[main.group].ms.toLowerCase()}`)}
           </h2>
           <div class="flex flex-wrap gap-2">
             {related.map((m) => (
@@ -209,7 +221,7 @@ const url = absolute(href(lang, path), Astro.site);
                 {COMBINED[m.slug]?.[lang] ?? m.name[lang]}
               </a>
             ))}
-            <a href={href(lang, 'reliefs/')} class="px-3 py-1.5 rounded-full text-sm text-emerald-700 underline">{zh ? '全部减免 →' : 'All reliefs →'}</a>
+            <a href={href(lang, 'reliefs/')} class="px-3 py-1.5 rounded-full text-sm text-emerald-700 underline">{L('全部减免 →', 'All reliefs →', 'Semua pelepasan →')}</a>
           </div>
         </section>
       )

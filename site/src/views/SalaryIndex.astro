@@ -6,6 +6,7 @@ import { YA2026 } from '../data/ya2026';
 import { YA2027 } from '../data/ya2027';
 import { SALARY_STEPS } from '../data/salaries';
 import { absolute, href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { t } from '../i18n/ui';
 import { rm } from '../lib/format';
 import { appLd } from '../lib/jsonld';
@@ -16,12 +17,18 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = 'salary/';
-const title = zh ? '马来西亚月薪到手计算器 2026（EPF、SOCSO、EIS、PCB）' : 'Malaysia Salary Calculator 2026: Take-Home Pay after EPF, SOCSO, EIS & PCB';
-const description = zh
-  ? '输入月薪，算出扣除 EPF、SOCSO、EIS 和 PCB 后每月到手多少，以及雇主成本。附 RM1,500 到 RM30,000 每档月薪的到手与税额表。'
-  : 'Work out your take-home pay after EPF, SOCSO, EIS and PCB, plus employer cost. Includes a table for every salary from RM1,500 to RM30,000.';
+const title = L(
+  '马来西亚月薪到手计算器 2026（EPF、SOCSO、EIS、PCB）',
+  'Malaysia Salary Calculator 2026: Take-Home Pay after EPF, SOCSO, EIS & PCB',
+  'Kalkulator Gaji Bersih Malaysia 2026: Selepas KWSP, PERKESO, SIP & PCB',
+);
+const description = L(
+  '输入月薪，算出扣除 EPF、SOCSO、EIS 和 PCB 后每月到手多少，以及雇主成本。附 RM1,500 到 RM30,000 每档月薪的到手与税额表。',
+  'Work out your take-home pay after EPF, SOCSO, EIS and PCB, plus employer cost. Includes a table for every salary from RM1,500 to RM30,000.',
+  'Kira gaji bersih anda selepas KWSP, PERKESO, SIP dan PCB, serta kos majikan. Termasuk jadual untuk setiap gaji dari RM1,500 hingga RM30,000.',
+);
 const rows = SALARY_STEPS.map((m) => ({
   m,
   b: salaryBreakdown(YA2026, m),
@@ -35,23 +42,27 @@ const url = absolute(href(lang, path), Astro.site);
   <PageHeader
     lang={lang}
     title={title}
-    intro={zh ? 'EPF 按第三附表、SOCSO/EIS 按 RM6,000 工资上限、PCB 按 LHDN 年度化公式估算。' : 'EPF follows the Third Schedule, SOCSO/EIS the RM6,000 wage ceiling, and PCB the annualised LHDN formula.'}
+    intro={L(
+      'EPF 按第三附表、SOCSO/EIS 按 RM6,000 工资上限、PCB 按 LHDN 年度化公式估算。',
+      'EPF follows the Third Schedule, SOCSO/EIS the RM6,000 wage ceiling, and PCB the annualised LHDN formula.',
+      'KWSP mengikut Jadual Ketiga, PERKESO/SIP mengikut siling gaji RM6,000, dan PCB mengikut formula tahunan LHDN.',
+    )}
     crumbs={[{ label: t(lang, 'nav.salary'), path }]}
   />
   <div class="max-w-5xl mx-auto px-4 py-8">
     <SalaryCalc client:load lang={lang} salaryPagesBase={href(lang, 'salary/')} />
 
     <section class="mt-12">
-      <h2 class="text-xl font-bold text-slate-900 mb-4">{zh ? '每档月薪到手与税额一览（单身）' : 'Take-home pay and tax by salary (single)'}</h2>
+      <h2 class="text-xl font-bold text-slate-900 mb-4">{L('每档月薪到手与税额一览（单身）', 'Take-home pay and tax by salary (single)', 'Gaji bersih dan cukai mengikut gaji (bujang)')}</h2>
       <div class="table-scroll bg-white rounded-2xl border border-slate-200">
         <table class="w-full text-sm num">
           <thead class="bg-slate-50 text-slate-600">
             <tr>
-              <th class="text-left p-3">{zh ? '月薪' : 'Salary'}</th>
+              <th class="text-left p-3">{L('月薪', 'Salary', 'Gaji')}</th>
               <th class="text-right p-3">{t(lang, 'calc.netPay')}</th>
               <th class="text-right p-3">PCB</th>
-              <th class="text-right p-3">{zh ? 'YA2026 年税' : 'YA2026 tax'}</th>
-              <th class="text-right p-3">{zh ? 'YA2027 年税' : 'YA2027 tax'}</th>
+              <th class="text-right p-3">{L('YA2026 年税', 'YA2026 tax', 'Cukai YA2026')}</th>
+              <th class="text-right p-3">{L('YA2027 年税', 'YA2027 tax', 'Cukai YA2027')}</th>
             </tr>
           </thead>
           <tbody>
@@ -74,7 +85,7 @@ const url = absolute(href(lang, path), Astro.site);
         </table>
       </div>
       <p class="text-xs text-slate-500 mt-2">
-        {zh ? '年税只计个人、EPF、SOCSO/EIS 三项基本减免，没有花红。' : 'Annual tax includes only the individual, EPF and SOCSO/EIS reliefs, with no bonus.'}
+        {L('年税只计个人、EPF、SOCSO/EIS 三项基本减免，没有花红。', 'Annual tax includes only the individual, EPF and SOCSO/EIS reliefs, with no bonus.', 'Cukai tahunan hanya mengambil kira pelepasan individu, KWSP dan PERKESO/SIP, tanpa bonus.')}
       </p>
     </section>
   </div>

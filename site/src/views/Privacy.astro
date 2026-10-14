@@ -2,67 +2,78 @@
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { CONFIG } from '../config';
+import { tri } from '../i18n/tri';
 import type { Lang } from '../lib/tax/types';
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const path = 'privacy/';
-const title = zh ? '隐私政策' : 'Privacy Policy';
-const description = zh ? '我们如何处理你的资料。' : 'How we handle your data.';
+const title = L('隐私政策', 'Privacy Policy', 'Dasar Privasi');
+const description = L('我们如何处理你的资料。', 'How we handle your data.', 'Cara kami mengendalikan data anda.');
 ---
 
 <Base lang={lang} title={title} description={description} path={path}>
   <PageHeader lang={lang} title={title} />
   <div class="max-w-3xl mx-auto px-4 py-8 prose-lite">
-    <p class="text-sm text-slate-500">{zh ? '生效日期' : 'Effective'}: {CONFIG.updated}</p>
-    <h2>{zh ? '你输入的数字' : 'What you type in'}</h2>
+    <p class="text-sm text-slate-500">{L('生效日期', 'Effective', 'Berkuat kuasa')}: {CONFIG.updated}</p>
+    <h2>{L('你输入的数字', 'What you type in', 'Apa yang anda masukkan')}</h2>
     <p>
       {
-        zh
-          ? '所有计算都在你的浏览器里完成。你输入的收入和开销不会发送到我们的服务器。为了方便你下次回来，计算器会把输入保存在你自己浏览器的 localStorage 里，你可以随时清除浏览器资料删除它。'
-          : 'All calculations run in your browser. The income and spending you enter are never sent to our servers. To save you retyping, calculators keep your inputs in your own browser’s localStorage; clear your browser data at any time to remove them.'
+        L(
+          '所有计算都在你的浏览器里完成。你输入的收入和开销不会发送到我们的服务器。为了方便你下次回来，计算器会把输入保存在你自己浏览器的 localStorage 里，你可以随时清除浏览器资料删除它。',
+          'All calculations run in your browser. The income and spending you enter are never sent to our servers. To save you retyping, calculators keep your inputs in your own browser’s localStorage; clear your browser data at any time to remove them.',
+          'Semua pengiraan dibuat dalam pelayar anda. Pendapatan dan perbelanjaan yang anda masukkan tidak dihantar ke pelayan kami. Supaya anda tidak perlu menaip semula, kalkulator menyimpan input dalam localStorage pelayar anda sendiri; padam data pelayar pada bila-bila masa untuk membuangnya.',
+        )
       }
     </p>
-    <h2>{zh ? '访问统计' : 'Analytics'}</h2>
+    <h2>{L('访问统计', 'Analytics', 'Analitik')}</h2>
     <p>
       {
-        zh
-          ? '我们可能使用 Cloudflare Web Analytics 统计页面浏览量。它不使用 cookie，也不追踪个人身份。'
-          : 'We may use Cloudflare Web Analytics to count page views. It uses no cookies and does not track individuals.'
+        L(
+          '我们可能使用 Cloudflare Web Analytics 统计页面浏览量。它不使用 cookie，也不追踪个人身份。',
+          'We may use Cloudflare Web Analytics to count page views. It uses no cookies and does not track individuals.',
+          'Kami mungkin menggunakan Cloudflare Web Analytics untuk mengira paparan halaman. Ia tidak menggunakan kuki dan tidak menjejak individu.',
+        )
       }
     </p>
-    <h2>{zh ? '广告' : 'Advertising'}</h2>
+    <h2>{L('广告', 'Advertising', 'Pengiklanan')}</h2>
     <p>
       {
-        zh
-          ? '本站可能通过 Google AdSense 显示广告。Google 及其合作伙伴可能使用 cookie，根据你过去访问本站或其他网站的记录投放广告。你可以在 Google 广告设置中关闭个性化广告：'
-          : 'This site may show ads through Google AdSense. Google and its partners may use cookies to serve ads based on your visits to this and other sites. You can turn off personalised ads in Google’s Ad Settings:'
-      }
+        L(
+          '本站可能通过 Google AdSense 显示广告。Google 及其合作伙伴可能使用 cookie，根据你过去访问本站或其他网站的记录投放广告。你可以在 Google 广告设置中关闭个性化广告：',
+          'This site may show ads through Google AdSense. Google and its partners may use cookies to serve ads based on your visits to this and other sites. You can turn off personalised ads in Google’s Ad Settings:',
+          'Laman ini mungkin memaparkan iklan melalui Google AdSense. Google dan rakan kongsinya mungkin menggunakan kuki untuk memaparkan iklan berdasarkan lawatan anda ke laman ini dan laman lain. Anda boleh mematikan iklan yang diperibadikan dalam Tetapan Iklan Google:',
+        )
+      }{' '}
       <a href="https://adssettings.google.com" rel="noopener" target="_blank">adssettings.google.com</a>
     </p>
-    <h2>{zh ? '付费产品' : 'Paid products'}</h2>
+    <h2>{L('付费产品', 'Paid products', 'Produk berbayar')}</h2>
     <p>
       {
-        zh
-          ? '工具包通过第三方平台（例如 Payhip）销售和付款。付款资料由该平台和支付服务商处理，我们不会接触你的银行卡资料。'
-          : 'The toolkit is sold through a third-party platform (such as Payhip). Payment details are handled by that platform and its payment providers; we never see your card details.'
+        L(
+          '工具包通过第三方平台（例如 Payhip）销售和付款。付款资料由该平台和支付服务商处理，我们不会接触你的银行卡资料。',
+          'The toolkit is sold through a third-party platform (such as Payhip). Payment details are handled by that platform and its payment providers; we never see your card details.',
+          'Kit dijual melalui platform pihak ketiga (seperti Payhip). Butiran pembayaran dikendalikan oleh platform tersebut dan penyedia pembayarannya; kami tidak melihat butiran kad anda.',
+        )
       }
     </p>
-    <h2>{zh ? '个人资料保护' : 'Personal data'}</h2>
+    <h2>{L('个人资料保护', 'Personal data', 'Data peribadi')}</h2>
     <p>
       {
-        zh
-          ? '我们按照马来西亚《2010 年个人资料保护法令》处理任何个人资料，不出售个人资料。'
-          : 'We handle any personal data in line with Malaysia’s Personal Data Protection Act 2010 and do not sell personal data.'
+        L(
+          '我们按照马来西亚《2010 年个人资料保护法令》处理任何个人资料，不出售个人资料。',
+          'We handle any personal data in line with Malaysia’s Personal Data Protection Act 2010 and do not sell personal data.',
+          'Kami mengendalikan sebarang data peribadi selaras dengan Akta Perlindungan Data Peribadi 2010 dan tidak menjual data peribadi.',
+        )
       }
     </p>
     {
       CONFIG.contactEmail && (
         <p>
-          {zh ? '有疑问请联系：' : 'Questions: '}
+          {L('有疑问请联系：', 'Questions: ', 'Pertanyaan: ')}
           <a href={`mailto:${CONFIG.contactEmail}`}>{CONFIG.contactEmail}</a>
         </p>
       )

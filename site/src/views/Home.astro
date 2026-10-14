@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Budget2027Calc from '../components/islands/Budget2027Calc';
 import { CONFIG } from '../config';
 import { absolute, href } from '../i18n/paths';
+import { tri } from '../i18n/tri';
 import { rm } from '../lib/format';
 import type { Lang } from '../lib/tax/types';
 
@@ -10,49 +11,65 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const zh = lang === 'zh';
+const L = tri(lang);
 const host = new URL(Astro.site ?? 'https://mytaxlah.com').host;
-const title = zh
-  ? '省税啦 MyTaxLah｜马来西亚个人所得税计算器 2026 · 2027 预算案省税计算'
-  : 'MyTaxLah — Malaysia Income Tax Calculator 2026 & Budget 2027 Savings';
-const description = zh
-  ? '免费的马来西亚个人所得税工具：2027 年预算案省税计算、YA2026 个税计算器、年底省税规划、月薪到手计算，以及全部 LHDN 减免清单。'
-  : 'Free Malaysian income tax tools: Budget 2027 savings, YA2026 tax calculator, year-end tax planner, take-home salary calculator and every LHDN relief explained.';
+const title = L(
+  '省税啦 MyTaxLah｜马来西亚个人所得税计算器 2026 · 2027 预算案省税计算',
+  'MyTaxLah — Malaysia Income Tax Calculator 2026 & Budget 2027 Savings',
+  'MyTaxLah — Kalkulator Cukai Pendapatan Malaysia 2026 & Penjimatan Bajet 2027',
+);
+const description = L(
+  '免费的马来西亚个人所得税工具：2027 年预算案省税计算、YA2026 个税计算器、年底省税规划、月薪到手计算，以及全部 LHDN 减免清单。',
+  'Free Malaysian income tax tools: Budget 2027 savings, YA2026 tax calculator, year-end tax planner, take-home salary calculator and every LHDN relief explained.',
+  'Alat cukai pendapatan Malaysia percuma: penjimatan Bajet 2027, kalkulator cukai YA2026, perancang cukai hujung tahun, kalkulator gaji bersih dan semua pelepasan cukai LHDN.',
+);
 
 const tools = [
   {
     path: 'budget-2027/',
     icon: '📉',
-    name: zh ? '2027 预算案省多少' : 'Budget 2027 savings',
-    desc: zh ? '个人减免升到 RM12,000、中等收入税率下调，看看你每年少交多少。' : 'RM12,000 individual relief and lower middle-income rates — see your yearly saving.',
+    name: L('2027 预算案省多少', 'Budget 2027 savings', 'Penjimatan Bajet 2027'),
+    desc: L(
+      '个人减免升到 RM12,000、中等收入税率下调，看看你每年少交多少。',
+      'RM12,000 individual relief and lower middle-income rates — see your yearly saving.',
+      'Pelepasan individu RM12,000 dan kadar lebih rendah untuk golongan pertengahan — lihat penjimatan tahunan anda.',
+    ),
   },
   {
     path: 'tax-calculator/',
     icon: '🧮',
-    name: zh ? 'YA2026 个税计算器' : 'YA2026 tax calculator',
-    desc: zh ? '全部减免、回扣、天课一次算清，还能看出会退税还是补税。' : 'Every relief, rebate and zakat — and whether you get a refund.',
+    name: L('YA2026 个税计算器', 'YA2026 tax calculator', 'Kalkulator cukai YA2026'),
+    desc: L(
+      '全部减免、回扣、天课一次算清，还能看出会退税还是补税。',
+      'Every relief, rebate and zakat — and whether you get a refund.',
+      'Semua pelepasan, rebat dan zakat — dan sama ada anda dapat bayaran balik.',
+    ),
   },
   {
     path: 'year-end-planner/',
     icon: '🗓️',
-    name: zh ? '年底省税规划器' : 'Year-end planner',
-    desc: zh ? '12 月 31 日前还剩哪些减免额度？按能省的税排序。' : 'Which reliefs can you still use before 31 Dec? Ranked by tax saved.',
+    name: L('年底省税规划器', 'Year-end planner', 'Perancang hujung tahun'),
+    desc: L(
+      '12 月 31 日前还剩哪些减免额度？按能省的税排序。',
+      'Which reliefs can you still use before 31 Dec? Ranked by tax saved.',
+      'Pelepasan apa yang masih boleh digunakan sebelum 31 Dis? Disusun ikut cukai yang dijimatkan.',
+    ),
   },
   {
     path: 'salary/',
     icon: '💼',
-    name: zh ? '月薪到手计算' : 'Take-home pay',
-    desc: zh ? 'EPF、SOCSO、EIS、PCB 扣完之后每月到手多少。' : 'What’s left after EPF, SOCSO, EIS and PCB.',
+    name: L('月薪到手计算', 'Take-home pay', 'Gaji bersih'),
+    desc: L('EPF、SOCSO、EIS、PCB 扣完之后每月到手多少。', 'What’s left after EPF, SOCSO, EIS and PCB.', 'Baki gaji selepas KWSP, PERKESO, SIP dan PCB.'),
   },
 ];
 
 const reliefs = [
-  { slug: 'lifestyle', name: zh ? '生活方式' : 'Lifestyle', amt: 2_500, desc: zh ? '手机、电脑、网络、书' : 'Phone, laptop, internet, books' },
-  { slug: 'medical', name: zh ? '医药' : 'Medical', amt: 10_000, desc: zh ? '体检、疫苗、牙科、重病' : 'Check-ups, vaccines, dental' },
-  { slug: 'prs', name: 'PRS', amt: 3_000, desc: zh ? '私人退休计划' : 'Private retirement scheme' },
-  { slug: 'sspn', name: 'SSPN', amt: 8_000, desc: zh ? '孩子教育储蓄' : 'Children’s education savings' },
-  { slug: 'sports', name: zh ? '运动' : 'Sports', amt: 1_000, desc: zh ? '器材、健身房、场地' : 'Gear, gym, court fees' },
-  { slug: 'parents', name: zh ? '父母医药' : 'Parents', amt: 8_000, desc: zh ? '父母/祖父母医药与护理' : 'Medical and care for parents' },
+  { slug: 'lifestyle', name: L('生活方式', 'Lifestyle', 'Gaya hidup'), amt: 2_500, desc: L('手机、电脑、网络、书', 'Phone, laptop, internet, books', 'Telefon, komputer, internet, buku') },
+  { slug: 'medical', name: L('医药', 'Medical', 'Perubatan'), amt: 10_000, desc: L('体检、疫苗、牙科、重病', 'Check-ups, vaccines, dental', 'Pemeriksaan, vaksin, pergigian') },
+  { slug: 'prs', name: 'PRS', amt: 3_000, desc: L('私人退休计划', 'Private retirement scheme', 'Skim Persaraan Swasta') },
+  { slug: 'sspn', name: 'SSPN', amt: 8_000, desc: L('孩子教育储蓄', 'Children’s education savings', 'Simpanan pendidikan anak') },
+  { slug: 'sports', name: L('运动', 'Sports', 'Sukan'), amt: 1_000, desc: L('器材、健身房、场地', 'Gear, gym, court fees', 'Peralatan, gim, gelanggang') },
+  { slug: 'parents', name: L('父母医药', 'Parents', 'Ibu bapa'), amt: 8_000, desc: L('父母/祖父母医药与护理', 'Medical and care for parents', 'Perubatan dan penjagaan ibu bapa') },
 ];
 const popular = [3_000, 4_000, 5_000, 6_000, 8_000, 10_000, 15_000];
 
@@ -69,13 +86,31 @@ const ld = {
   <section class="bg-gradient-to-b from-emerald-50 to-slate-50 border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 pt-10 pb-8">
       <p class="inline-block text-xs font-semibold text-emerald-800 bg-emerald-100 rounded-full px-3 py-1">
-        {zh ? '已更新：2027 年财政预算案（2026 年 10 月 9 日）' : 'Updated for Budget 2027 (9 October 2026)'}
+        {L('已更新：2027 年财政预算案（2026 年 10 月 9 日）', 'Updated for Budget 2027 (9 October 2026)', 'Dikemas kini untuk Bajet 2027 (9 Oktober 2026)')}
       </p>
       <h1 class="mt-4 text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
-        {zh ? <>2027 预算案后，<span class="text-emerald-700">你每年能少交多少税？</span></> : <>After Budget 2027, <span class="text-emerald-700">how much less tax will you pay?</span></>}
+        {
+          L(
+            <>
+              2027 预算案后，<span class="text-emerald-700">你每年能少交多少税？</span>
+            </>,
+            <>
+              After Budget 2027, <span class="text-emerald-700">how much less tax will you pay?</span>
+            </>,
+            <>
+              Selepas Bajet 2027, <span class="text-emerald-700">berapa banyak cukai anda boleh jimat?</span>
+            </>,
+          )
+        }
       </h1>
       <p class="mt-3 text-slate-600 max-w-2xl">
-        {zh ? '输入月薪，3 秒算出来。全部计算都在你的浏览器里完成，不需要注册，也不会上传任何资料。' : 'Enter your salary and get the answer in seconds. Everything runs in your browser — no sign-up, nothing uploaded.'}
+        {
+          L(
+            '输入月薪，3 秒算出来。全部计算都在你的浏览器里完成，不需要注册，也不会上传任何资料。',
+            'Enter your salary and get the answer in seconds. Everything runs in your browser — no sign-up, nothing uploaded.',
+            'Masukkan gaji anda dan dapatkan jawapan dalam beberapa saat. Semua pengiraan dibuat dalam pelayar anda — tiada pendaftaran, tiada data dimuat naik.',
+          )
+        }
       </p>
       <div class="mt-6">
         <Budget2027Calc
@@ -92,12 +127,14 @@ const ld = {
 
   <div class="max-w-5xl mx-auto px-4 py-10 space-y-12">
     <section>
-      <h2 class="text-xl font-bold text-slate-900 mb-4">{zh ? '免费工具' : 'Free tools'}</h2>
+      <h2 class="text-xl font-bold text-slate-900 mb-4">{L('免费工具', 'Free tools', 'Alat percuma')}</h2>
       <div class="grid sm:grid-cols-2 gap-4">
         {
           tools.map((tool) => (
             <a href={href(lang, tool.path)} class="block bg-white rounded-2xl border border-slate-200 p-5 hover:border-emerald-600 hover:shadow-sm transition">
-              <p class="text-2xl" aria-hidden="true">{tool.icon}</p>
+              <p class="text-2xl" aria-hidden="true">
+                {tool.icon}
+              </p>
               <p class="mt-2 font-semibold text-slate-900">{tool.name}</p>
               <p class="mt-1 text-sm text-slate-600">{tool.desc}</p>
             </a>
@@ -107,9 +144,9 @@ const ld = {
     </section>
 
     <section>
-      <div class="flex items-end justify-between mb-4">
-        <h2 class="text-xl font-bold text-slate-900">{zh ? '最常用的减免（YA2026）' : 'Most-used reliefs (YA2026)'}</h2>
-        <a href={href(lang, 'reliefs/')} class="text-sm text-emerald-700 underline">{zh ? '全部减免 →' : 'All reliefs →'}</a>
+      <div class="flex items-end justify-between mb-4 gap-3">
+        <h2 class="text-xl font-bold text-slate-900">{L('最常用的减免（YA2026）', 'Most-used reliefs (YA2026)', 'Pelepasan paling popular (YA2026)')}</h2>
+        <a href={href(lang, 'reliefs/')} class="text-sm text-emerald-700 underline shrink-0">{L('全部减免 →', 'All reliefs →', 'Semua pelepasan →')}</a>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
         {
@@ -125,31 +162,45 @@ const ld = {
     </section>
 
     <section>
-      <h2 class="text-xl font-bold text-slate-900 mb-4">{zh ? '月薪到手多少？' : 'Take-home pay by salary'}</h2>
+      <h2 class="text-xl font-bold text-slate-900 mb-4">{L('月薪到手多少？', 'Take-home pay by salary', 'Gaji bersih ikut gaji')}</h2>
       <div class="flex flex-wrap gap-2">
         {
           popular.map((m) => (
             <a href={href(lang, `salary/rm${m}/`)} class="px-4 py-2 rounded-full bg-white border border-slate-200 hover:border-emerald-600 num">
-              {zh ? `月薪 ${rm(m)}` : `${rm(m)} / month`}
+              {L(`月薪 ${rm(m)}`, `${rm(m)} / month`, `Gaji ${rm(m)}`)}
             </a>
           ))
         }
-        <a href={href(lang, 'salary/')} class="px-4 py-2 text-emerald-700 underline">{zh ? '更多 →' : 'More →'}</a>
+        <a href={href(lang, 'salary/')} class="px-4 py-2 text-emerald-700 underline">
+          {L('更多 →', 'More →', 'Lagi →')}
+        </a>
       </div>
     </section>
 
     <section class="grid md:grid-cols-3 gap-4 text-sm">
       <div class="bg-white rounded-xl border border-slate-200 p-4">
-        <p class="font-semibold text-slate-900">{zh ? '数据来自官方' : 'Official sources'}</p>
-        <p class="text-slate-600 mt-1">{zh ? '税率和减免依据财政部预算案税务措施文件与 LHDN 资料。' : 'Rates and reliefs come from the Finance Ministry’s budget tax measures and LHDN.'}</p>
+        <p class="font-semibold text-slate-900">{L('数据来自官方', 'Official sources', 'Sumber rasmi')}</p>
+        <p class="text-slate-600 mt-1">
+          {
+            L(
+              '税率和减免依据财政部预算案税务措施文件与 LHDN 资料。',
+              'Rates and reliefs come from the Finance Ministry’s budget tax measures and LHDN.',
+              'Kadar dan pelepasan diambil daripada dokumen langkah cukai bajet Kementerian Kewangan dan LHDN.',
+            )
+          }
+        </p>
       </div>
       <div class="bg-white rounded-xl border border-slate-200 p-4">
-        <p class="font-semibold text-slate-900">{zh ? '资料不离开你的手机' : 'Your data stays on your device'}</p>
-        <p class="text-slate-600 mt-1">{zh ? '所有计算在浏览器里完成，我们看不到你的收入。' : 'All calculations run in your browser — we never see your income.'}</p>
+        <p class="font-semibold text-slate-900">{L('资料不离开你的手机', 'Your data stays on your device', 'Data kekal dalam peranti anda')}</p>
+        <p class="text-slate-600 mt-1">
+          {L('所有计算在浏览器里完成，我们看不到你的收入。', 'All calculations run in your browser — we never see your income.', 'Semua pengiraan dibuat dalam pelayar anda — kami tidak melihat pendapatan anda.')}
+        </p>
       </div>
       <div class="bg-white rounded-xl border border-slate-200 p-4">
-        <p class="font-semibold text-slate-900">{zh ? '中文 + English' : 'English + 中文'}</p>
-        <p class="text-slate-600 mt-1">{zh ? '每个工具都有中英文版本，方便分享给家人。' : 'Every tool in both languages — easy to share with family.'}</p>
+        <p class="font-semibold text-slate-900">{L('中文 + English + BM', 'English + 中文 + BM', 'BM + English + 中文')}</p>
+        <p class="text-slate-600 mt-1">
+          {L('每个工具都有中文、英文和马来文版本，方便分享给家人和同事。', 'Every tool in three languages — easy to share with family and colleagues.', 'Setiap alat dalam tiga bahasa — mudah dikongsi dengan keluarga dan rakan sekerja.')}
+        </p>
       </div>
     </section>
   </div>

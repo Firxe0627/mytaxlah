@@ -6,6 +6,7 @@ import { computeTax } from '../../lib/tax/compute';
 import { eisEmployee, epfEmployee, socsoEmployee } from '../../lib/tax/salary';
 import type { Claims, Lang, ReliefRule } from '../../lib/tax/types';
 import { t } from '../../i18n/ui';
+import { tri } from '../../i18n/tri';
 import { Checkbox, MoneyInput, Row, Stepper, usePersisted } from './ui';
 
 export interface MetaLite {
@@ -38,7 +39,7 @@ interface State {
 const RULES = { 2026: YA2026, 2027: YA2027 } as const;
 
 export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2026 }: Props) {
-  const zh = lang === 'zh';
+  const L = tri(lang);
   const [s, setS] = usePersisted<State>('mtl.taxcalc', {
     ya: defaultYa,
     monthly: 5_000,
@@ -74,7 +75,7 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
     const status = (
       <>
         {t(lang, 'common.limit')} {rm(rule.limit)}
-        {rule.kind === 'count' ? (zh ? ' / 人' : ' each') : ''} · {zh ? '已计' : 'counted'} <b class="text-slate-700">{rm(used)}</b>
+        {rule.kind === 'count' ? L(' / 人', ' each', ' seorang') : ''} · {L('已计', 'counted', 'dikira')} <b class="text-slate-700">{rm(used)}</b>
       </>
     );
 
@@ -88,7 +89,7 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
       return <Stepper id={`r-${rule.id}`} label={name} value={s.claims[rule.id] ?? 0} onChange={(v) => setClaim(rule.id, Math.floor(v))} hint={status} max={15} />;
     }
     if ((rule.id === 'epf' || rule.id === 'socso') && s.auto) {
-      return <Row label={<span class="text-sm">{name}</span>} value={<span class="text-sm">{rm(used, true)} <span class="text-slate-400">({zh ? '自动' : 'auto'})</span></span>} />;
+      return <Row label={<span class="text-sm">{name}</span>} value={<span class="text-sm">{rm(used, true)} <span class="text-slate-400">({L('自动', 'auto', 'auto')})</span></span>} />;
     }
     if (rule.parts) {
       return (
@@ -138,12 +139,12 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
             </div>
             <p class="text-xs text-slate-500 mt-1">
               {s.ya === 2026
-                ? zh
-                  ? 'YA2026 = 2026 年的收入，2027 年 3–5 月报税。'
-                  : 'YA2026 = income earned in 2026, filed Mar–May 2027.'
-                : zh
-                  ? 'YA2027 = 2027 年的收入，2028 年报税（按 2027 年预算案提议计算）。'
-                  : 'YA2027 = income earned in 2027, filed in 2028 (Budget 2027 proposals).'}
+                ? L('YA2026 = 2026 年的收入，2027 年 3–5 月报税。', 'YA2026 = income earned in 2026, filed Mar–May 2027.', 'YA2026 = pendapatan tahun 2026, difailkan Mac–Mei 2027.')
+                : L(
+                    'YA2027 = 2027 年的收入，2028 年报税（按 2027 年预算案提议计算）。',
+                    'YA2027 = income earned in 2027, filed in 2028 (Budget 2027 proposals).',
+                    'YA2027 = pendapatan tahun 2027, difailkan pada 2028 (cadangan Bajet 2027).',
+                  )}
             </p>
           </div>
           <div class="grid sm:grid-cols-2 gap-4">
@@ -152,17 +153,17 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
           </div>
           <MoneyInput
             id="tc-other"
-            label={zh ? '其他应课税收入（每年）' : 'Other taxable income (per year)'}
+            label={L('其他应课税收入（每年）', 'Other taxable income (per year)', 'Pendapatan bercukai lain (setahun)')}
             value={s.otherIncome}
             onChange={(v) => setS((p) => ({ ...p, otherIncome: v }))}
-            hint={zh ? '租金、兼职、佣金等。' : 'Rental, side income, commissions, etc.'}
+            hint={L('租金、兼职、佣金等。', 'Rental, side income, commissions, etc.', 'Sewa, pendapatan sampingan, komisen dan lain-lain.')}
           />
           <Checkbox
             id="tc-auto"
-            label={zh ? '按月薪自动计算 EPF 与 SOCSO/EIS 减免' : 'Auto-calculate EPF and SOCSO/EIS from salary'}
+            label={L('按月薪自动计算 EPF 与 SOCSO/EIS 减免', 'Auto-calculate EPF and SOCSO/EIS from salary', 'Kira KWSP dan PERKESO/SIP secara automatik daripada gaji')}
             checked={s.auto}
             onChange={(v) => setS((p) => ({ ...p, auto: v }))}
-            hint={zh ? `EPF ${rm(epfPaid)}、SOCSO+EIS ${rm(socsoPaid, true)}（每年）` : `EPF ${rm(epfPaid)}, SOCSO+EIS ${rm(socsoPaid, true)} a year`}
+            hint={L(`EPF ${rm(epfPaid)}、SOCSO+EIS ${rm(socsoPaid, true)}（每年）`, `EPF ${rm(epfPaid)}, SOCSO+EIS ${rm(socsoPaid, true)} a year`, `KWSP ${rm(epfPaid)}, PERKESO+SIP ${rm(socsoPaid, true)} setahun`)}
           />
         </div>
 
@@ -192,10 +193,10 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
           <MoneyInput id="tc-zakat" label={t(lang, 'calc.zakat')} value={s.zakat} onChange={(v) => setS((p) => ({ ...p, zakat: v }))} />
           <MoneyInput
             id="tc-pcb"
-            label={zh ? '今年已扣的 PCB（可选）' : 'PCB already deducted (optional)'}
+            label={L('今年已扣的 PCB（可选）', 'PCB already deducted (optional)', 'PCB yang sudah dipotong (pilihan)')}
             value={s.pcbPaid}
             onChange={(v) => setS((p) => ({ ...p, pcbPaid: v }))}
-            hint={zh ? '看 EA 表格或薪资单，算出会退税还是补税。' : 'From your EA form or payslips — shows refund or balance.'}
+            hint={L('看 EA 表格或薪资单，算出会退税还是补税。', 'From your EA form or payslips — shows refund or balance.', 'Daripada Borang EA atau slip gaji — menunjukkan bayaran balik atau baki cukai.')}
           />
         </div>
         <button
@@ -215,11 +216,13 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
           <p class="text-4xl font-extrabold text-slate-900 num mt-1">{rm(result.netTax, true)}</p>
           {diff !== null && (
             <p class={`mt-2 text-sm font-semibold ${diff >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-              {diff >= 0 ? (zh ? `预计退税 ${rm(diff, true)}` : `Expected refund ${rm(diff, true)}`) : zh ? `预计要补税 ${rm(-diff, true)}` : `Expected balance to pay ${rm(-diff, true)}`}
+              {diff >= 0
+                ? L(`预计退税 ${rm(diff, true)}`, `Expected refund ${rm(diff, true)}`, `Jangkaan bayaran balik ${rm(diff, true)}`)
+                : L(`预计要补税 ${rm(-diff, true)}`, `Expected balance to pay ${rm(-diff, true)}`, `Jangkaan baki cukai perlu dibayar ${rm(-diff, true)}`)}
             </p>
           )}
           <div class="mt-4 text-sm border-t border-slate-100 pt-3">
-            <Row label={zh ? '总收入' : 'Total income'} value={rm(result.income)} />
+            <Row label={L('总收入', 'Total income', 'Jumlah pendapatan')} value={rm(result.income)} />
             <Row label={t(lang, 'calc.totalRelief')} value={`− ${rm(result.totalRelief)}`} />
             <Row label={t(lang, 'calc.chargeable')} value={rm(result.chargeable)} strong />
             <Row label={t(lang, 'calc.grossTax')} value={rm(result.grossTax, true)} />
@@ -256,9 +259,11 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
           )}
         </div>
         <p class="text-xs text-slate-500 px-1">
-          {zh
-            ? '假设你是马来西亚税务居民、个人分开报税。结果为估算，实际以 LHDN 评估为准。'
-            : 'Assumes a Malaysian tax resident filing separately. Estimate only — LHDN’s assessment is final.'}
+          {L(
+            '假设你是马来西亚税务居民、个人分开报税。结果为估算，实际以 LHDN 评估为准。',
+            'Assumes a Malaysian tax resident filing separately. Estimate only — LHDN’s assessment is final.',
+            'Andaian: pemastautin cukai Malaysia, taksiran berasingan. Anggaran sahaja — taksiran LHDN adalah muktamad.',
+          )}
         </p>
       </aside>
 
@@ -270,7 +275,7 @@ export default function TaxCalc({ lang, meta, groups, reliefsBase, defaultYa = 2
           {t(lang, 'calc.netTax')} · YA{s.ya}
         </span>
         <span class="font-bold num">
-          {rm(result.netTax, true)} <span class="text-emerald-400 text-sm font-normal">{zh ? '明细 ↓' : 'details ↓'}</span>
+          {rm(result.netTax, true)} <span class="text-emerald-400 text-sm font-normal">{L('明细 ↓', 'details ↓', 'butiran ↓')}</span>
         </span>
       </a>
     </div>

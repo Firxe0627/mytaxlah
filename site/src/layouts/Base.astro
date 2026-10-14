@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { CONFIG } from '../config';
-import { absolute, asset, href, htmlLang, otherLang } from '../i18n/paths';
+import { LANG_LABEL, LANGS, absolute, asset, href, hreflang, htmlLang, otherLangs } from '../i18n/paths';
 import { t } from '../i18n/ui';
 import type { Lang } from '../lib/tax/types';
 
@@ -22,10 +22,10 @@ const { lang, title, description, path, hasAlternate = true, jsonLd = [], ogType
 const brand = CONFIG.brand[lang];
 const fullTitle = title.includes(brand) ? title : `${title} | ${brand}`;
 const canonical = absolute(href(lang, path), Astro.site);
-const altZh = absolute(href('zh', path), Astro.site);
-const altEn = absolute(href('en', path), Astro.site);
-const ogImage = absolute(asset(lang === 'zh' ? 'og-zh.png' : 'og-en.png'), Astro.site);
-const switchHref = href(otherLang(lang), hasAlternate ? path : '');
+const alternates = LANGS.map((l) => ({ lang: l, url: absolute(href(l, path), Astro.site) }));
+const xDefault = absolute(href('en', path), Astro.site);
+const ogImage = absolute(asset(`og-${lang}.png`), Astro.site);
+const ogLocale = { zh: 'zh_MY', en: 'en_MY', ms: 'ms_MY' }[lang];
 const current = Astro.url.pathname;
 
 const nav = [
@@ -51,9 +51,8 @@ const isActive = (p: string) => current.startsWith(href(lang, p));
     {
       hasAlternate && (
         <>
-          <link rel="alternate" hreflang="zh-MY" href={altZh} />
-          <link rel="alternate" hreflang="en-MY" href={altEn} />
-          <link rel="alternate" hreflang="x-default" href={altEn} />
+          {alternates.map((a) => <link rel="alternate" hreflang={hreflang(a.lang)} href={a.url} />)}
+          <link rel="alternate" hreflang="x-default" href={xDefault} />
         </>
       )
     }
@@ -67,7 +66,7 @@ const isActive = (p: string) => current.startsWith(href(lang, p));
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:locale" content={lang === 'zh' ? 'zh_MY' : 'en_MY'} />
+    <meta property="og:locale" content={ogLocale} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" href={asset('sitemap.xml')} />
     {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
@@ -89,7 +88,7 @@ const isActive = (p: string) => current.startsWith(href(lang, p));
           <span>{brand}</span>
           <span class="hidden sm:inline text-xs font-normal text-slate-500">{lang === 'zh' ? CONFIG.brand.en : CONFIG.brand.zh}</span>
         </a>
-        <nav class="hidden md:flex items-center gap-1 ml-auto text-sm">
+        <nav class="hidden lg:flex items-center gap-0.5 ml-auto text-sm">
           {
             nav.map((n) => (
               <a
@@ -104,14 +103,21 @@ const isActive = (p: string) => current.startsWith(href(lang, p));
             ))
           }
         </nav>
-        <a
-          href={switchHref}
-          hreflang={otherLang(lang) === 'zh' ? 'zh-MY' : 'en-MY'}
-          class="ml-auto md:ml-2 text-sm px-2.5 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 shrink-0"
-        >
-          {t(lang, 'lang.switch')}
-        </a>
-        <details class="md:hidden relative">
+        <div class="ml-auto lg:ml-2 flex items-center gap-1 shrink-0">
+          {
+            otherLangs(lang).map((l) => (
+              <a
+                href={href(l, hasAlternate ? path : '')}
+                hreflang={hreflang(l)}
+                lang={htmlLang(l)}
+                class="text-sm px-2 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                {LANG_LABEL[l]}
+              </a>
+            ))
+          }
+        </div>
+        <details class="lg:hidden relative">
           <summary class="list-none cursor-pointer p-2 -mr-2 rounded-md hover:bg-slate-100" aria-label="Menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <path d="M4 7h16M4 12h16M4 17h16"></path>
