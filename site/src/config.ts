@@ -6,7 +6,7 @@ export const CONFIG = {
   brand: { zh: '省税啦', en: 'MyTaxLah' },
   /** Payhip (or other) checkout link for the paid toolkit. Empty = toolkit CTA hidden. */
   toolkitUrl: '',
-  toolkitPrice: 'RM19.90',
+  toolkitPrice: 'US$4.49 (≈RM19)',
   /** Google AdSense publisher id, e.g. "ca-pub-1234567890123456". Empty = no ads. */
   adsenseClient: '',
   /** Cloudflare Web Analytics token. Empty = no analytics. */
